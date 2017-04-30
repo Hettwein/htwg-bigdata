@@ -18,7 +18,8 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV,
     "org.scalatest"     %% "scalatest" % scalaTestV % "test",
-    "net.liftweb" %% "lift-json" % "2.6"
+    "net.liftweb" %% "lift-json" % "2.6",
+    "net.debasishg" %% "redisclient" % "3.4"
   )
 }
 

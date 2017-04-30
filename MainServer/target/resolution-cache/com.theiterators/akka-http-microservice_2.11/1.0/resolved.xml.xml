@@ -4,7 +4,7 @@
 		module="akka-http-microservice_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20170405084416"
+		publication="20170424104704"
 	>
 		<description>
 		akka-http-microservice
