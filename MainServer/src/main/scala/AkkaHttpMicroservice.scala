@@ -24,8 +24,8 @@ trait Service extends DefaultJsonProtocol {
   implicit val ant_dtoFormat = jsonFormat5(Ant_DTO)
   implicit val antFormat = jsonFormat3(Ant)
 
+  var db: Database = new Database()
   val antService: AntService = new AntService()
-  val db: Database = new Database()
   val routes = {
     logRequestResult("akka-http-microservice") {
       pathPrefix("ants") {
@@ -80,10 +80,9 @@ trait Service extends DefaultJsonProtocol {
                         case StatusCodes.Created => {
                           /* Ameise bewegen auf Main Server */
                           antService.updateAnt(ant.id, ant.x_new, ant.y_new)
-                          db.updateAnt(ant.id, ant.x_new, ant.y_new)
-
+                          db.updateAnt(ant.id, ant.x_new, ant.y_new)}
                           statusCode = StatusCodes.OK.intValue
-                        }
+
 
                         /* Ameise hat sich nicht bewegt */
                         case StatusCodes.Forbidden => {
