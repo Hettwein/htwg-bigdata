@@ -12,6 +12,8 @@ libraryDependencies ++= {
   val scalaTestV  = "2.2.6"
 
   Seq(
+    //scala mongodb driver
+    "org.mongodb.scala" %% "mongo-scala-driver" % "1.0.1",
     "com.typesafe.akka" %% "akka-actor" % akkaV,
     "com.typesafe.akka" %% "akka-stream" % akkaV,
     "com.typesafe.akka" %% "akka-http-experimental" % akkaV,
@@ -20,8 +22,11 @@ libraryDependencies ++= {
     "org.scalatest"     %% "scalatest" % scalaTestV % "test",
     "net.liftweb" %% "lift-json" % "2.6",
     "net.debasishg" %% "redisclient" % "3.4"
+
   )
 }
+
+
 
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
