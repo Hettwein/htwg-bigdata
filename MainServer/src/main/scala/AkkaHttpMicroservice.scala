@@ -10,6 +10,9 @@ import com.typesafe.config.{Config, ConfigFactory}
 import net.liftweb.json._
 import spray.json.{DefaultJsonProtocol, _}
 import java.util.concurrent.atomic.AtomicInteger
+
+import DatabaseRead.convertDbObjectToAnt
+
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContextExecutor, _}
 import scala.concurrent.duration.Duration
@@ -24,13 +27,38 @@ trait Service extends DefaultJsonProtocol {
   implicit val ant_dtoFormat = jsonFormat5(Ant_DTO)
   implicit val antFormat = jsonFormat3(Ant)
 
-  var db: Database = new Database()
+  //val db: Database = Database
   val antService: AntService = new AntService()
   val routes = {
     logRequestResult("akka-http-microservice") {
+
       pathPrefix("ants") {
         pathEnd {
           get {
+            val positions = antService.getAntsPosition()
+            val strBuilder = new StringBuilder
+            for (row <- 0 to rows) {
+              for (col <- 0 to columns) {
+                if (positions.exists(p => p.x == col && p.y == row)) {
+                  strBuilder ++= " "
+                  strBuilder ++= "@"
+                } else {
+                  strBuilder ++= "  "
+                }
+              }
+              strBuilder ++= "\n"
+            }
+            complete(strBuilder.toString)
+          }
+        }
+      }~pathPrefix("replay") {
+        pathEnd {
+          get {
+            var ants = DatabaseRead.readAnts()
+            for( ant <-  ants){
+              antService.updateAnt(ant.id, ant.x, ant.y)
+            }
+
             val positions = antService.getAntsPosition()
             val strBuilder = new StringBuilder
             for (row <- 0 to rows) {
@@ -80,7 +108,7 @@ trait Service extends DefaultJsonProtocol {
                         case StatusCodes.Created => {
                           /* Ameise bewegen auf Main Server */
                           antService.updateAnt(ant.id, ant.x_new, ant.y_new)
-                          db.updateAnt(ant.id, ant.x_new, ant.y_new)}
+                          Database.updateAnt(ant.id, ant.x_new, ant.y_new)}
                           statusCode = StatusCodes.OK.intValue
 
 

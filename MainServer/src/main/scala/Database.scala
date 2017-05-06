@@ -1,6 +1,11 @@
+
 import com.redis._
-import org.mongodb.scala.{Completed, MongoClient, MongoCollection, MongoDatabase, Observer}
+import org.mongodb.scala.bson.{BsonInt32, BsonString}
+import org.mongodb.scala.{Completed, FindObservable, MongoClient, MongoCollection, MongoDatabase, Observable, Observer, SingleObservable}
 import org.mongodb.scala.bson.collection.immutable.Document
+import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Sorts._
+
 
 /**
   * TODO
@@ -12,20 +17,22 @@ import org.mongodb.scala.bson.collection.immutable.Document
   * Start Server CMD: redis-cli, redis-cli shutdown, redis-server
   * Monitor Server CMD: redis-cli monitor
   */
-class Database() {
+object Database {
+
+  val mongoClient: MongoClient = MongoClient()
+  val startTimeMillis = System.currentTimeMillis;
+  //val mongoClient: MongoClient = MongoClient("mongodb://localhost")
 
   def updateAnt(id: String, x: Int, y: Int) {
-
-    //val mongoClient: MongoClient = MongoClient("mongodb://localhost")
-
-    val mongoClient: MongoClient = MongoClient()
-
-    val doc: Document = Document("timestamp" -> System.currentTimeMillis / 1000, "id" -> id, "x" -> x, "y" -> y)
+    val doc: Document = Document("timestamp" -> (System.currentTimeMillis - startTimeMillis), "id" -> id, "x" -> x, "y" -> y)
 
 
     val database: MongoDatabase = mongoClient.getDatabase("ants")
 
-    val collection: MongoCollection[Document] = database.getCollection("ants")
+    /**
+      * change collection here
+      */
+    val collection: MongoCollection[Document] = database.getCollection("ants2")
 
     collection.insertOne(doc).subscribe(new Observer[Completed] {
 
@@ -34,10 +41,45 @@ class Database() {
       override def onError(e: Throwable): Unit = println("Failed")
 
       override def onComplete(): Unit = println("Completed")
-    })//.result?
+    })
+  }
+
+  def readAnts(): Unit = {
+/*
+
+    val database: MongoDatabase = mongoClient.getDatabase("ants")
+
+    val collection: MongoCollection[Document] = database.getCollection("ants")
+
+    val observable: Observable[Document] = collection.find(exists("timestamp")).sort(ascending("timestamp"))
 
 
-    //val r = new RedisClient("localhost", 6379)
-    //r.lpush(id, Map("timestamp" -> System.currentTimeMillis / 1000, "pos" -> Position(x,y)))
+    observable.subscribe(new Observer[Document] {
+      override def onNext(result: Document): Unit = {
+        //println("onNext")
+        //println(result.toJson())
+      }
+
+      override def onError(e: Throwable): Unit = println("Failed" + e.getMessage)
+
+      override def onComplete(): Unit = {
+        println("Completed")
+
+      }
+    })
+
+    for (document: Document <- observable) {
+      println(document.toJson())
+      //var timestamp = document.get[BsonString]("id")
+
+      var id = document.get[BsonString]("id") map (_.asString().getValue)
+
+      var x = document.get[BsonInt32]("x") map (_.asInt32().getValue)
+      var y = document.get[BsonInt32]("y") map (_.asInt32().getValue)
+
+
+    }
+    println("Completed")
+    //return observable*/
   }
 }

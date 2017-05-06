@@ -23,7 +23,13 @@ class AntService(){
 
   def updateAnt(id: String, x: Int, y: Int) {
     val ant = Ant(id,x,y)
-    ants.update(id,ant)
+    if(ants.contains(id)){
+      ants.update(id,ant)
+    }else{
+      var ant = new Ant(id, x, y)
+      createAnt(ant)
+    }
+
   }
 
   def getAntsPosition(): mutable.HashSet[Position] = {

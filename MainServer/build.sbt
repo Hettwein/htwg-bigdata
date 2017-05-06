@@ -13,7 +13,8 @@ libraryDependencies ++= {
 
   Seq(
     //scala mongodb driver
-    "org.mongodb.scala" %% "mongo-scala-driver" % "1.0.1",
+    "org.mongodb.scala" %% "mongo-scala-driver" % "2.0.0",
+    "org.mongodb" %% "casbah" % "3.1.1",
     "com.typesafe.akka" %% "akka-actor" % akkaV,
     "com.typesafe.akka" %% "akka-stream" % akkaV,
     "com.typesafe.akka" %% "akka-http-experimental" % akkaV,

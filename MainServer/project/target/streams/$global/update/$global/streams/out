@@ -3592,7 +3592,7 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#apply-macro;0.13.11!apply-macro.jar
 [debug] 	[NOT REQUIRED] org.scala-lang#jline;2.10.6!jline.jar
 [debug] 	[NOT REQUIRED] org.fusesource.jansi#jansi;1.4!jansi.jar
-[debug] :: resolution report :: resolve 3822ms :: artifacts dl 140ms
+[debug] :: resolution report :: resolve 3921ms :: artifacts dl 95ms
 [debug] 	report for default#mainserver-build;0.1-SNAPSHOT compile produced in C:\Users\Philipp\SeminarBigData\htwg-bigdata\MainServer\project\target\resolution-cache\reports\default-mainserver-build-compile.xml
 [debug] 	report for default#mainserver-build;0.1-SNAPSHOT runtime produced in C:\Users\Philipp\SeminarBigData\htwg-bigdata\MainServer\project\target\resolution-cache\reports\default-mainserver-build-runtime.xml
 [debug] 	report for default#mainserver-build;0.1-SNAPSHOT test produced in C:\Users\Philipp\SeminarBigData\htwg-bigdata\MainServer\project\target\resolution-cache\reports\default-mainserver-build-test.xml
@@ -3606,5 +3606,5 @@
 [debug] 	report for default#mainserver-build;0.1-SNAPSHOT docs produced in C:\Users\Philipp\SeminarBigData\htwg-bigdata\MainServer\project\target\resolution-cache\reports\default-mainserver-build-docs.xml
 [debug] 	report for default#mainserver-build;0.1-SNAPSHOT pom produced in C:\Users\Philipp\SeminarBigData\htwg-bigdata\MainServer\project\target\resolution-cache\reports\default-mainserver-build-pom.xml
 [debug] 	report for default#mainserver-build;0.1-SNAPSHOT scala-tool produced in C:\Users\Philipp\SeminarBigData\htwg-bigdata\MainServer\project\target\resolution-cache\reports\default-mainserver-build-scala-tool.xml
-[debug] 	resolve done (3822ms resolve - 140ms download)
+[debug] 	resolve done (3921ms resolve - 95ms download)
 [info] Done updating.
