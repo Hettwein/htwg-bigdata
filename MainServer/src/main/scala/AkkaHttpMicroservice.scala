@@ -28,7 +28,7 @@ trait Service extends DefaultJsonProtocol {
   implicit val antFormat = jsonFormat3(Ant)
 
   //val db: Database = Database
-  val antService: AntService = new AntService()
+  var antService: AntService = new AntService()
   val routes = {
     logRequestResult("akka-http-microservice") {
 
@@ -76,17 +76,23 @@ trait Service extends DefaultJsonProtocol {
 
 
         }
+      }~pathPrefix("startreplay") {
+
+        get {
+          DatabaseRead.currentMillis = 0;
+          antService = new AntService()
+          complete("ok")
+        }
+
       }~pathPrefix("newsimulation") {
 
           get {
             Database.generateNewCollectionName()
-            println("////////////////////////////")
-            println("////////////////////////////")
-            println("////////////////////////////")
+            antService = new AntService()
             complete("ok")
           }
 
-      } ~
+      }~
         pathPrefix("ant") {
           path(Segment) { id =>
             get {
