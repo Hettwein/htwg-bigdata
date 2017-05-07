@@ -52,30 +52,41 @@ trait Service extends DefaultJsonProtocol {
           }
         }
       }~pathPrefix("replay") {
-        pathEnd {
-          get {
-            var ants = DatabaseRead.readAnts()
-            for( ant <-  ants){
-              antService.updateAnt(ant.id, ant.x, ant.y)
-            }
+            path(RestPath) { collectionname =>
 
-            val positions = antService.getAntsPosition()
-            val strBuilder = new StringBuilder
-            for (row <- 0 to rows) {
-              for (col <- 0 to columns) {
-                if (positions.exists(p => p.x == col && p.y == row)) {
-                  strBuilder ++= " "
-                  strBuilder ++= "@"
-                } else {
-                  strBuilder ++= "  "
-                }
+              var ants = DatabaseRead.readAnts(collectionname.toString())
+              for (ant <- ants) {
+                antService.updateAnt(ant.id, ant.x, ant.y)
               }
-              strBuilder ++= "\n"
-            }
-            complete(strBuilder.toString)
-          }
+
+              val positions = antService.getAntsPosition()
+              val strBuilder = new StringBuilder
+              for (row <- 0 to rows) {
+                for (col <- 0 to columns) {
+                  if (positions.exists(p => p.x == col && p.y == row)) {
+                    strBuilder ++= " "
+                    strBuilder ++= "@"
+                  } else {
+                    strBuilder ++= "  "
+                  }
+                }
+                strBuilder ++= "\n"
+              }
+              complete(strBuilder.toString)
+
+
         }
-      }~
+      }~pathPrefix("newsimulation") {
+
+          get {
+            Database.generateNewCollectionName()
+            println("////////////////////////////")
+            println("////////////////////////////")
+            println("////////////////////////////")
+            complete("ok")
+          }
+
+      } ~
         pathPrefix("ant") {
           path(Segment) { id =>
             get {

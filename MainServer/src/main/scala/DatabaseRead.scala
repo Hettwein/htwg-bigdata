@@ -1,5 +1,7 @@
 import com.mongodb.casbah.Imports._
 
+import scala.collection.mutable
+
 object DatabaseRead {
 
   var currentMillis:Long = 0;
@@ -14,9 +16,9 @@ object DatabaseRead {
     AntPosition(id, x, y, timestamp)
   }
 
-  def getFirstTimestamp():Long={
+  def getFirstTimestamp(collectionname:String):Long={
 
-    val collection = db("ants")
+    val collection = db(collectionname)
 
     var ants = collection.find().limit(1)
     var timestamp:Long = 0
@@ -27,13 +29,29 @@ object DatabaseRead {
     return timestamp
   }
 
-  def readAnts():  List[AntPosition]={
+  def getHighestCollectionNamesNumber(): Int ={
+
+    val collectionNames:mutable.Set[String] = db.collectionNames
+
+    var number = 0;
+    for(collectionName <- collectionNames){
+      println(collectionName)
+      var numberAsString = collectionName.split("n")
+      val localNumber = numberAsString(1).toInt
+      if(localNumber>number){
+        number = localNumber
+      }
+    }
+    return number
+  }
+
+  def readAnts(collectionname:String):  List[AntPosition]={
 
     if(currentMillis ==0){
-      currentMillis = getFirstTimestamp()
+      currentMillis = getFirstTimestamp(collectionname)
     }
 
-    val collection = db("ants")
+    val collection = db(collectionname)
 
     var ants = collection.find("timestamp" $gte currentMillis $lt currentMillis+1000 )
 

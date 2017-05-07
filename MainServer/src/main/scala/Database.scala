@@ -20,7 +20,9 @@ import org.mongodb.scala.model.Sorts._
 object Database {
 
   val mongoClient: MongoClient = MongoClient()
-  val startTimeMillis = System.currentTimeMillis;
+  val startTimeMillis = System.currentTimeMillis
+  var collectionName = ""
+
   //val mongoClient: MongoClient = MongoClient("mongodb://localhost")
 
   def updateAnt(id: String, x: Int, y: Int) {
@@ -29,10 +31,7 @@ object Database {
 
     val database: MongoDatabase = mongoClient.getDatabase("ants")
 
-    /**
-      * change collection here
-      */
-    val collection: MongoCollection[Document] = database.getCollection("ants2")
+    val collection: MongoCollection[Document] = database.getCollection(collectionName)
 
     collection.insertOne(doc).subscribe(new Observer[Completed] {
 
@@ -42,6 +41,12 @@ object Database {
 
       override def onComplete(): Unit = println("Completed")
     })
+  }
+
+  def generateNewCollectionName(): Unit ={
+    var highestNumber = DatabaseRead.getHighestCollectionNamesNumber()+1
+    collectionName = "collection"+highestNumber
+    println("new collectionname: "+collectionName)
   }
 
   def readAnts(): Unit = {

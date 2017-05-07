@@ -1,10 +1,15 @@
 package htwg.bigdata.actorsystem.httpAnt
 
 import java.util.concurrent.atomic.AtomicInteger
-import scala.concurrent.ExecutionContextExecutor
+
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpMethods.POST
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.{ActorMaterializer, Materializer}
+
 import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
 
@@ -24,6 +29,12 @@ object AntSimulation {
   def getCounter = counter.incrementAndGet
 
   def main(args: Array[String]) {
+
+    /**
+      * tell mainserver that a new simulation has started
+      */
+    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = "http://" + AntSimulation.mainServerAdresse + "/newsimulation", entity = ""))
+
     val antSystem = ActorSystem("antsystem")
     println("AntSimulation-Start")
     for (it <- 1 to antNumber) {
