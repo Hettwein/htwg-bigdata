@@ -1,0 +1,25 @@
+{
+	[
+		{
+			step: 1,
+			time: 1000,
+			fields: [
+				{
+					x: 1,
+					y: 1,
+					ants: 29,
+					cocentration: 25
+				},
+				{
+					x: 2,
+					y: 1,
+					ants: 58,
+					cocentration: 50
+				},	
+			]
+		},
+		{
+		next step
+		}
+	]
+}
