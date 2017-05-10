@@ -5,7 +5,8 @@ import org.mongodb.scala.{Completed, FindObservable, MongoClient, MongoCollectio
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Sorts._
-
+import com.typesafe.config
+import com.typesafe.config.ConfigFactory
 
 /**
   * TODO
@@ -47,6 +48,22 @@ object Database {
     var highestNumber = DatabaseRead.getHighestCollectionNamesNumber()+1
     collectionName = "collection"+highestNumber
     println("new collectionname: "+collectionName)
+    val config=ConfigFactory.load()
+    val doc: Document = Document("rows" -> config.getString("fieldWith.rows").toInt, "columns" -> config.getString("fieldWith.columns").toInt, "destX" -> config.getString("destination.x").toInt, "destY" -> config.getString("destination.y").toInt)
+  
+   val database: MongoDatabase = mongoClient.getDatabase("ants")
+
+    val collection: MongoCollection[Document] = database.getCollection(collectionName)
+
+    collection.insertOne(doc).subscribe(new Observer[Completed] {
+
+      override def onNext(result: Completed): Unit = println("Inserted")
+
+      override def onError(e: Throwable): Unit = println("Failed")
+
+      override def onComplete(): Unit = println("Completed")
+    })
+  
   }
 
   def readAnts(): Unit = {
