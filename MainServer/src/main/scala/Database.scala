@@ -49,7 +49,7 @@ object Database {
     collectionName = "collection"+highestNumber
     println("new collectionname: "+collectionName)
     val config=ConfigFactory.load()
-    val doc: Document = Document("rows" -> config.getString("fieldWith.rows"), "columns" -> config.getString("fieldWith.columns"), "destX" -> config.getString("destination.x"), "destY" -> config.getString("destination.y"))
+    val doc: Document = Document("rows" -> config.getString("fieldWith.rows").toInt, "columns" -> config.getString("fieldWith.columns").toInt, "destX" -> config.getString("destination.x").toInt, "destY" -> config.getString("destination.y").toInt)
   
    val database: MongoDatabase = mongoClient.getDatabase("ants")
 
