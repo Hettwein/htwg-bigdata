@@ -32,6 +32,8 @@ object WordCount {
     val columns = extractConfig(rdd)
     val antsPos = extractAntPos(rdd)
 
+    //TODO: nicht erstes Dokument holen, sondern Dokument mit kleinstem Timestamp
+    //TODO: RDD erst nach TimeStamp sortieren
     firstTimestamp = antsPos.first().getLong("timestamp")
     var x = 0
     for (x <- 1 to 3) {
