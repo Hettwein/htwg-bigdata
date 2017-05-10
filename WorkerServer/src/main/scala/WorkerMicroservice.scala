@@ -86,4 +86,5 @@ object AkkaHttpMicroservice extends App with Service {
   }
   println("Worker on Port " + config.getInt("http.port"))
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
+  
 }
