@@ -105,20 +105,54 @@ object WordCount {
         ants.contains((id, timestamp))
       })
 
-      //build json
+      
+      
+      //calculate new x and y
+     val currentAnts2= currentAnts.map(doc=>
+       {doc.append("newX", (doc.getInteger("x")*ratio).toInt)
+       doc.append("newY", (doc.getInteger("y")*ratio).toInt)
+       doc.append("posID",(doc.get("newX").toString()+"_"+doc.get("newY").toString()))
+       }
+       
+     ).map(doc=>(doc.get("posID").toString().hashCode(),doc))
+     
+     val currentAnts3=currentAnts2.reduceByKey((doc:Document,doc2:Document)=>doc)
+     val antCount=currentAnts2.countByKey()
+     
+     
+     val currentsAnts4=currentAnts3.map(doc=>{
+       doc._2.append("ants", antCount.get(doc._1))
+     }
+     )
 
+//     val currentAnts3=currentAnts2.map(doc=>{
+//        doc._2.
+//     })
+     
+      
+     currentsAnts4.foreach(doc => println(doc))
+     antCount.foreach(doc=>println(doc))
+     
+ 
+      
+      
+      //build json
+      
+      
       val step = GridRepresentation(stepCount, currentMillis, currentAnts)
       gridRepresentation::=step
       
-      
+
       
       currentMillis += gridRequest.timestep
-//      currentAnts.foreach(doc => println(doc))
 //      println(antCount)
       stepCount = stepCount + 1
-    } while (currentMillis <= 4000)
+    } while (currentMillis <= lastTimestamp)
 
     gridRepresentation.foreach(g=>println(g))
+    
+    
+    
     // Flip (word, count) tuples to (count, word) and then sort by key (the counts)
     //val wordCountsSorted = wordCounts.map( x => (x._2, x._1) ).sortByKey()
 
