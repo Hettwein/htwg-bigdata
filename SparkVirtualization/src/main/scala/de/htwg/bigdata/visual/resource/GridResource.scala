@@ -8,6 +8,9 @@ import akka.stream.ActorMaterializer
 import scala.io.StdIn
 import net.liftweb.json._
 import de.htwg.bigdata.visual.spark.DataProcessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 case class GridRequest(collection: String, x: Int, y: Int, timestep: Int)
 
@@ -25,13 +28,17 @@ object GridResource {
         decodeRequest {
           (get & entity(as[String])) { gridRequest: String =>
             val json = parse(gridRequest)
-            val gridrequest = json.extract[GridRequest]
+            val mapper = new ObjectMapper() with ScalaObjectMapper
+            mapper.registerModule(DefaultScalaModule)
+            val myMap = mapper.readValue(gridRequest,classOf[GridRequest])
+
+            //val gridrequest = json.extract[GridRequest]
             val dataProcessor = new DataProcessor
-            val newGrid =dataProcessor.transformGrid(gridrequest)
-            
-              complete {
-                (HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
-              }
+            val newGrid = dataProcessor.transformGrid(myMap)
+
+            complete {
+              HttpResponse(entity = newGrid.toString())
+            }
           }
         }
 
@@ -45,9 +52,7 @@ object GridResource {
       .flatMap(_.unbind()) // trigger unbinding from the port
       .onComplete(_ => system.terminate()) // and shutdown when done
   }
-  
-  
-  
+
 }
 
 

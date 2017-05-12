@@ -24,7 +24,7 @@ import java.io.StringWriter
 
 
 
-class DataProcessor {
+class DataProcessor extends java.io.Serializable{
   case class GridRepresentation(step: Int, time: Long, fields: Array[Document])
 
   
@@ -54,6 +54,7 @@ class DataProcessor {
     var gridRepresentation = List[GridRepresentation]()
     var stepCount = 1
     do {
+      
       val currentPos = antsPos.filter(doc => filterCurrentPos(doc, currentMillis))
       val currentAntsTuple = currentPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
         .map(item => item.swap).sortByKey(false, 1)
@@ -99,7 +100,7 @@ class DataProcessor {
 
       currentMillis += gridRequest.timestep
       stepCount = stepCount + 1
-    } while (currentMillis <= 4000)
+    } while (currentMillis <= lastTimestamp)
 
     gridRepresentation.foreach(g => println(g))
     return parseToJson(gridRepresentation)
@@ -124,7 +125,7 @@ class DataProcessor {
 //    
 //    
 //    compact(render(json))
-    return ""
+    return json
   }
 
 
