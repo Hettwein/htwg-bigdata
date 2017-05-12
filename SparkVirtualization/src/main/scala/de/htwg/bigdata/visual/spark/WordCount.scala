@@ -17,7 +17,7 @@ import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
-case class GridRepresentation(step: Int, time: Long, fields: RDD[Document]) 
+case class GridRepresentation(step: Int, time: Long, fields: RDD[Document])
 
 object WordCount {
 
@@ -77,7 +77,7 @@ object WordCount {
 
     val columns = extractConfig(rdd)
     val antsPos = extractAntPos(rdd)
-    val antCount = antsPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
+    val antNumber = antsPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
       .map(item => item.swap).sortByKey(false, 1)
       .map(item => item.swap)
       .reduceByKey((a: Int, b: Int) => a).count()
@@ -105,54 +105,45 @@ object WordCount {
         ants.contains((id, timestamp))
       })
 
-      
-      
       //calculate new x and y
-     val currentAnts2= currentAnts.map(doc=>
-       {doc.append("newX", (doc.getInteger("x")*ratio).toInt)
-       doc.append("newY", (doc.getInteger("y")*ratio).toInt)
-       doc.append("posID",(doc.get("newX").toString()+"_"+doc.get("newY").toString()))
-       }
-       
-     ).map(doc=>(doc.get("posID").toString().hashCode(),doc))
-     
-     val currentAnts3=currentAnts2.reduceByKey((doc:Document,doc2:Document)=>doc)
-     val antCount=currentAnts2.countByKey()
-     
-     
-     val currentsAnts4=currentAnts3.map(doc=>{
-       doc._2.append("ants", antCount.get(doc._1))
-     }
-     )
+      val currentAnts2 = currentAnts.map(doc =>
+        {
+          doc.append("newX", (doc.getInteger("x") * ratio).toInt)
+          doc.append("newY", (doc.getInteger("y") * ratio).toInt)
+          doc.append("posID", (doc.get("newX").toString() + "_" + doc.get("newY").toString()))
+        }).map(doc => (doc.get("posID").toString().hashCode(), doc))
 
-//     val currentAnts3=currentAnts2.map(doc=>{
-//        doc._2.
-//     })
-     
-      
-     currentsAnts4.foreach(doc => println(doc))
-     antCount.foreach(doc=>println(doc))
-     
- 
-      
-      
+      val currentAnts3 = currentAnts2.reduceByKey((doc: Document, doc2: Document) => doc)
+      val antCount = currentAnts2.countByKey()
+
+      val currentsAnts4 = currentAnts3.map(doc => {
+        doc._2.append("ants", (antCount.get(doc._1)) match {
+          case Some(x: Long) => x // this extracts the value in a as an Int
+          case _             => 0L
+        })
+        var conc=doc._2.getLong("ants").toFloat/ antNumber*100
+        doc._2.append("concentration", conc)
+      })
+
+      //     val currentAnts3=currentAnts2.map(doc=>{
+      //        doc._2.
+      //     })
+
+      currentsAnts4.foreach(doc => println(doc))
+      antCount.foreach(doc => println(doc))
+      println(antNumber)
       //build json
-      
-      
+
       val step = GridRepresentation(stepCount, currentMillis, currentAnts)
-      gridRepresentation::=step
-      
+      gridRepresentation ::= step
 
-      
       currentMillis += gridRequest.timestep
-//      println(antCount)
+      //      println(antCount)
       stepCount = stepCount + 1
-    } while (currentMillis <= lastTimestamp)
+    } while (currentMillis <= 4000)
 
-    gridRepresentation.foreach(g=>println(g))
-    
-    
-    
+    gridRepresentation.foreach(g => println(g))
+
     // Flip (word, count) tuples to (count, word) and then sort by key (the counts)
     //val wordCountsSorted = wordCounts.map( x => (x._2, x._1) ).sortByKey()
 
