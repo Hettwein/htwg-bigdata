@@ -16,26 +16,21 @@ import scala.math.Ordering
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import com.fasterxml.jackson
+import com.fasterxml.jackson._
+import scala.xml.Group
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.io.StringWriter
 
-case class GridRepresentation(step: Int, time: Long, fields: Array[Document])
-
-object WordCount {
-
-  /** Count up how many of each word appears in a book as simply as possible. */
-
-  /** Our main function where the action happens */
-  def main(args: Array[String]) {
-    transformGrid(new GridRequest("collection7", 80, 80, 1000))
-
-  }
 
 
+class DataProcessor {
+  case class GridRepresentation(step: Int, time: Long, fields: Array[Document])
 
-  def transformGrid(gridRequest: GridRequest) = {
+  
+  
+  def transformGrid(gridRequest: GridRequest):String = {
+    
     // Create a SparkContext using every core of the local machine
     val sc = new SparkContext("local[*]", "WordCount")
     val config = ConfigFactory.load()
@@ -104,14 +99,18 @@ object WordCount {
 
       currentMillis += gridRequest.timestep
       stepCount = stepCount + 1
-    } while (currentMillis <= lastTimestamp)
+    } while (currentMillis <= 4000)
 
-    //gridRepresentation.foreach(g => println(g))
+    gridRepresentation.foreach(g => println(g))
+    return parseToJson(gridRepresentation)
+  }
+  
+  private def parseToJson(gridRep:List[GridRepresentation]):String={
     
     val mapper = new ObjectMapper()
     mapper.registerModule(DefaultScalaModule)
     val out=new StringWriter
-    mapper.writeValue(out, gridRepresentation)
+    mapper.writeValue(out, gridRep)
     
     
     
@@ -119,10 +118,15 @@ object WordCount {
     
     val json=out.toString()
         println(json)
-    
+//    
+//                  
+//    
+//    
+//    
+//    compact(render(json))
+    return ""
   }
 
-  //as
 
   private def extractConfig(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("rows"))
   private def extractAntPos(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("x"))
@@ -131,6 +135,4 @@ object WordCount {
   object TimeOrdering extends Ordering[Document] {
     def compare(doca: Document, docb: Document) = doca.getLong("timestamp").toInt compare docb.getLong("timestamp").toInt
   }
-
 }
-
