@@ -19,46 +19,103 @@ object WordCount {
 
   /** Our main function where the action happens */
   def main(args: Array[String]) {
-  transformGrid(new GridRequest("collection7",80,80,1000))
-    
+    transformGrid(new GridRequest("collection7", 80, 80, 1000))
+
   }
-  
-  def transformGrid(gridRequest:GridRequest) = {
+
+  def transformGrid2(gridRequest: GridRequest) = {
+
+    val sparkSession = SparkSession.builder()
+      .master("local")
+      .appName("MongoSparkConnectorIntro")
+      .config("spark.mongodb.input.uri", "mongodb://127.0.0.1/ants.collection7")
+      .config("spark.mongodb.output.uri", "mongodb://127.0.0.1/ants.collection7")
+      .getOrCreate()
+
+    val rdd = MongoSpark.load(sparkSession.sparkContext)
+
+    val columns = extractConfig(rdd)
+    val antsPos = extractAntPos(rdd)
+
+    rdd.toDF.createOrReplaceTempView("allEntries")
+
+    val firstTimestamp = sparkSession.sql("SELECT MIN(timestamp) FROM allEntries").toJavaRDD.first().get(0)
+    val lastTimestamp = sparkSession.sql("SELECT MAX(timestamp) FROM allEntries").toJavaRDD.first().get(0)
+    var currentMillis = firstTimestamp.toString().toInt
+    do {
+
+      val currentAnts = sparkSession.sql("SELECT _id, id, timestamp, x, y FROM allEntries WHERE timestamp<" + currentMillis)
+
+      //currentAnts.createOrReplaceTempView(viewName)
+
+      //      val currentPos = antsPos.filter(doc => filterCurrentPos(doc, currentMillis))
+      //      val currentAnts = currentPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
+      //        .map(item => item.swap).sortByKey(false, 1)
+      //        .map(item => item.swap)
+      //        .reduceByKey((a: Int, b: Int) => a)
+
+      currentMillis += gridRequest.timestep
+      //currentAnts2.foreach(doc => println(doc))
+    } while (currentMillis < 4000)
+
+  }
+
+  def transformGrid(gridRequest: GridRequest) = {
     // Create a SparkContext using every core of the local machine
     val sc = new SparkContext("local[*]", "WordCount")
     val config = ConfigFactory.load()
 
-    val readConfig = new ReadConfig(config.getString("mongodb.db"), config.getString("mongodb.collection"), Some(config.getString("mongodb.uri")))
+    val readConfig = new ReadConfig(config.getString("mongodb.db"), gridRequest.collection, Some(config.getString("mongodb.uri")))
     val rdd = MongoSpark.load(sc, readConfig)
 
     val columns = extractConfig(rdd)
     val antsPos = extractAntPos(rdd)
 
-    val firstTimestamp=antsPos.min()(TimeOrdering).getLong("timestamp")
-    val lastTimestamp=antsPos.max()(TimeOrdering).getLong("timestamp")
-    var currentMillis=firstTimestamp
-    do{
-      val currentPos = antsPos.filter(doc => filterCurrentPos(doc,currentMillis))
-      val currentAnts = currentPos.filter(doc => filterCurrentAnts(doc, currentPos,currentMillis))
+    val firstTimestamp = antsPos.min()(TimeOrdering).getLong("timestamp")
+    val lastTimestamp = antsPos.max()(TimeOrdering).getLong("timestamp")
+    var currentMillis = firstTimestamp
+    do {
+      val currentPos = antsPos.filter(doc => filterCurrentPos(doc, currentMillis))
+      val currentAntsTuple = currentPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
+        .map(item => item.swap).sortByKey(false, 1)
+        .map(item => item.swap)
+        .reduceByKey((a: Int, b: Int) => a)
+
+      val ants = currentAntsTuple.collect()
+
+      val currentAnts = currentPos.filter(doc => {
+        val id = doc.getString("id").toInt;
+        val timestamp = doc.getLong("timestamp").toInt
+        ants.contains((id, timestamp))
+
+      })
+      
+      
+
+
       currentMillis += gridRequest.timestep
-      currentPos.foreach(doc => println(doc))
-    }while(currentMillis<lastTimestamp)
+      currentAnts.foreach(doc => println(doc))
+       println(currentAnts.count())
+    } while (currentMillis <= lastTimestamp)
 
+    // Flip (word, count) tuples to (count, word) and then sort by key (the counts)
+    //val wordCountsSorted = wordCounts.map( x => (x._2, x._1) ).sortByKey()
 
-  } 
-  
+  }
+
   //as
 
-  def extractConfig(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("rows"))
-  def extractAntPos(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("x"))
-  def filterCurrentPos(doc: Document,currentMillis:Long): Boolean = if (doc.getLong("timestamp") < currentMillis) true else false
-  
-  def filterCurrentAnts(doc: Document, rdd: RDD[Document],currentMillis:Long): Boolean = if (doc.getLong("timestamp") < currentMillis) true else false
-  
-  
-  object TimeOrdering extends Ordering[Document]{
-    def compare(doca:Document, docb:Document) = doca.getLong("timestamp").toInt compare docb.getLong("timestamp").toInt
+  private def extractConfig(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("rows"))
+  private def extractAntPos(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("x"))
+  private def filterCurrentPos(doc: Document, currentMillis: Long): Boolean = if (doc.getLong("timestamp") < currentMillis) true else false
+  //  private def filterCurrentAnts(doc:Document,rdd: RDD[(Int,Int)]) :Boolean= {
+  //    val id=doc.getString("id").toInt
+  //    
+  //  }
+
+  object TimeOrdering extends Ordering[Document] {
+    def compare(doca: Document, docb: Document) = doca.getLong("timestamp").toInt compare docb.getLong("timestamp").toInt
   }
-  
+
 }
 
