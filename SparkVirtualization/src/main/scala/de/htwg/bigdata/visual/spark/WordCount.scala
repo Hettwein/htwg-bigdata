@@ -1,6 +1,7 @@
 package de.htwg.bigdata.visual.spark
 
 import com.mongodb.spark.MongoSpark
+
 import com.mongodb.spark.config.ReadConfig
 import com.typesafe.config.ConfigFactory
 import org.bson.Document
@@ -12,6 +13,11 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.rdd.RDD
 import de.htwg.bigdata.visual.resource.GridRequest
 import scala.math.Ordering
+import org.json4s.JsonDSL._
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+
+case class GridRepresentation(step: Int, time: Long, fields: RDD[Document]) 
 
 object WordCount {
 
@@ -42,6 +48,7 @@ object WordCount {
     val firstTimestamp = sparkSession.sql("SELECT MIN(timestamp) FROM allEntries").toJavaRDD.first().get(0)
     val lastTimestamp = sparkSession.sql("SELECT MAX(timestamp) FROM allEntries").toJavaRDD.first().get(0)
     var currentMillis = firstTimestamp.toString().toInt
+
     do {
 
       val currentAnts = sparkSession.sql("SELECT _id, id, timestamp, x, y FROM allEntries WHERE timestamp<" + currentMillis)
@@ -70,10 +77,19 @@ object WordCount {
 
     val columns = extractConfig(rdd)
     val antsPos = extractAntPos(rdd)
+    val antCount = antsPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
+      .map(item => item.swap).sortByKey(false, 1)
+      .map(item => item.swap)
+      .reduceByKey((a: Int, b: Int) => a).count()
+
+    val ratio = columns.first.getInteger("rows").toFloat / gridRequest.x.toFloat
 
     val firstTimestamp = antsPos.min()(TimeOrdering).getLong("timestamp")
     val lastTimestamp = antsPos.max()(TimeOrdering).getLong("timestamp")
-    var currentMillis = firstTimestamp
+    var currentMillis = 0
+
+    var gridRepresentation = List[GridRepresentation]()
+    var stepCount = 1
     do {
       val currentPos = antsPos.filter(doc => filterCurrentPos(doc, currentMillis))
       val currentAntsTuple = currentPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
@@ -87,17 +103,22 @@ object WordCount {
         val id = doc.getString("id").toInt;
         val timestamp = doc.getLong("timestamp").toInt
         ants.contains((id, timestamp))
-
       })
+
+      //build json
+
+      val step = GridRepresentation(stepCount, currentMillis, currentAnts)
+      gridRepresentation::=step
       
       
-
-
+      
       currentMillis += gridRequest.timestep
-      currentAnts.foreach(doc => println(doc))
-       println(currentAnts.count())
-    } while (currentMillis <= lastTimestamp)
+//      currentAnts.foreach(doc => println(doc))
+//      println(antCount)
+      stepCount = stepCount + 1
+    } while (currentMillis <= 4000)
 
+    gridRepresentation.foreach(g=>println(g))
     // Flip (word, count) tuples to (count, word) and then sort by key (the counts)
     //val wordCountsSorted = wordCounts.map( x => (x._2, x._1) ).sortByKey()
 
@@ -108,10 +129,6 @@ object WordCount {
   private def extractConfig(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("rows"))
   private def extractAntPos(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("x"))
   private def filterCurrentPos(doc: Document, currentMillis: Long): Boolean = if (doc.getLong("timestamp") < currentMillis) true else false
-  //  private def filterCurrentAnts(doc:Document,rdd: RDD[(Int,Int)]) :Boolean= {
-  //    val id=doc.getString("id").toInt
-  //    
-  //  }
 
   object TimeOrdering extends Ordering[Document] {
     def compare(doca: Document, docb: Document) = doca.getLong("timestamp").toInt compare docb.getLong("timestamp").toInt
