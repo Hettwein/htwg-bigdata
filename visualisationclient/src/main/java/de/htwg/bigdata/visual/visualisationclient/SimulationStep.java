@@ -1,6 +1,6 @@
 package de.htwg.bigdata.visual.visualisationclient;
 
-public class SimulationStep {
+public class SimulationStep implements Comparable<SimulationStep>{
 	private int step;
 	private int time;
 	private double[][] fields;
@@ -45,5 +45,9 @@ public class SimulationStep {
 	}
 	public void setFields(double[][] fields) {
 		this.fields = fields;
+	}
+
+	public int compareTo(SimulationStep that) {
+		return this.step - that.step;		
 	}
 }

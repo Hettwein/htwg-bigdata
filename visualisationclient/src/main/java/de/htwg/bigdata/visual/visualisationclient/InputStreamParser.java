@@ -1,6 +1,7 @@
 package de.htwg.bigdata.visual.visualisationclient;
 
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,6 +40,12 @@ public class InputStreamParser {
 			}
 			data.add(simulationStep);
 		}
+		
+		data.sort(new Comparator<SimulationStep>() {
+			public int compare(SimulationStep arg0, SimulationStep arg1) {
+				return arg0.compareTo(arg1);				
+			}			
+		});
 		
 		return data;
 		

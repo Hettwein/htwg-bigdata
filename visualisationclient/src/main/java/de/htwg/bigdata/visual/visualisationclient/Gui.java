@@ -25,6 +25,8 @@ public class Gui extends JFrame {
 	private Controller controller;
 	private final boolean useGraphicsYAxis = true;
 	private final int defaultFieldSize = 500;
+	SimulationLoader simulationLoader;
+	SimulationPlayer simulationPlayer;
 	
 	public Gui(final Controller controller) throws Exception {
 
@@ -53,17 +55,61 @@ public class Gui extends JFrame {
 	    paramPanel.add(new JLabel("Stepsize"));
 	    final JTextField stepSize = new JTextField(10);
 	    paramPanel.add(stepSize);
+
+	    //Go-Button
 	    JButton go = new JButton("Go");
 	    go.addActionListener(new ActionListener() {    	
-			public void actionPerformed(ActionEvent e) {				
-				new SimulationPerformer(
+			public void actionPerformed(ActionEvent e) {								
+				simulationLoader = new SimulationLoader(
 						simulationName.getText(), 
 						Integer.valueOf(fieldSize.getText()), 
-						Integer.valueOf(stepSize.getText())).execute();
+						Integer.valueOf(stepSize.getText()));
+				simulationLoader.execute();
 													
 			}    	
 	    });
-	    paramPanel.add(go);	    
+	    paramPanel.add(go);	
+	    
+	    //Stop-Button
+	    JButton stop = new JButton("Stop");
+	    stop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (simulationPlayer != null) { simulationPlayer.cancel(true); }
+			}
+	    	
+	    });
+	    paramPanel.add(stop);
+	    
+	    //Play-Button
+	    JButton play = new JButton("Play");
+	    play.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				simulationPlayer = new SimulationPlayer(controller.getStepSize());
+				simulationPlayer.execute();
+			}	    	
+	    });
+	    paramPanel.add(play);
+	    
+	    //Prev-Button
+	    JButton prev = new JButton("Prev");
+	    prev.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (!simulationPlayer.isCancelled()) { return; }
+				heatMapPanel.updateData(controller.getPrevStep().getFields(), useGraphicsYAxis);
+			}	    	
+	    });
+	    paramPanel.add(prev);
+	    
+	    //Next-Button
+	    JButton next = new JButton("Next");
+	    next.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (!simulationPlayer.isCancelled()) { return; }
+				heatMapPanel.updateData(controller.getNextStep().getFields(), useGraphicsYAxis);
+			}	    	
+	    });
+	    paramPanel.add(next);	    	    
+	    
 	    mainPanel.add(paramPanel);	    	    
 	    mainPanel.add(heatMapPanel);	   
 	    contentPane.add(mainPanel);
@@ -81,12 +127,12 @@ public class Gui extends JFrame {
 	    }
 	    
 	    
-	    class SimulationPerformer extends SwingWorker<Void,Void> {
+	    class SimulationLoader extends SwingWorker<Void,Void> {
 	    	private String simulationName;
 	    	private int fieldSize;
 	    	private int stepSize;
 	    	
-	    	public SimulationPerformer(String simulationName, int fieldSize, int stepSize) {
+	    	public SimulationLoader(String simulationName, int fieldSize, int stepSize) {
 	    		this.simulationName = simulationName;
 	    		this.fieldSize = fieldSize;
 	    		this.stepSize = stepSize;
@@ -94,27 +140,42 @@ public class Gui extends JFrame {
 	    	
 			@Override
 			protected Void doInBackground() throws Exception {
-				List<SimulationStep> steps = controller.getSimulationData(simulationName, fieldSize, stepSize);
+				
+				controller.loadSimulationData(simulationName, fieldSize, stepSize);				
 				
 				if (fieldSize < defaultFieldSize) {
 					heatMapPanel.setSize(defaultFieldSize, defaultFieldSize);
 				} else {
 					heatMapPanel.setSize(fieldSize, fieldSize);
 				}
-								
-				for (SimulationStep step : steps) {
-					heatMapPanel.updateData(step.getFields(), useGraphicsYAxis);
-					try {
-						Thread.sleep(stepSize);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				return null; 
+				
+				simulationPlayer = new SimulationPlayer(stepSize);
+				simulationPlayer.execute();
+				
+				return null;
 			}
-	    	
 	    }
+	    
+		class SimulationPlayer extends SwingWorker<Void, Void> {
+			private int stepSize;
+			
+			public SimulationPlayer(int stepSize) {
+				this.stepSize = stepSize;
+			}
+			
+			
+			@Override
+			protected Void doInBackground() throws Exception {
+				SimulationStep step = controller.getNextStep();
+				while (step != null) {
+					heatMapPanel.updateData(step.getFields(), useGraphicsYAxis);
+					Thread.sleep(stepSize);
+					step = controller.getNextStep();
+				}							
+				return null;
+			}
+			
+		}
 
 	}
 

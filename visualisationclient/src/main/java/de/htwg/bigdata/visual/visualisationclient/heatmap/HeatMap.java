@@ -363,7 +363,7 @@ public class HeatMap extends JPanel
 //                smallest = Math.min(data[x][y], smallest);
 //            }
 //        }
-        
+//        
         //Ant-Concentration always between 0 and 100
         smallest = 0.0;
         largest = 100.0;

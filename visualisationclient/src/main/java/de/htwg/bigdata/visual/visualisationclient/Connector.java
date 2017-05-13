@@ -11,7 +11,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class Connector {
-	private final String hostUrl = "http://127.0.0.1:9200";
+	private final String hostUrl = "http://localhost:9500/grid";
 	
 	public Connector () {}
 
@@ -19,24 +19,29 @@ public class Connector {
 		
 		return this.getSimulationDataFromFile();
 		
-//		URL url = new URL(hostUrl);
+//		String param = 
+//				"collection=" + URLEncoder.encode(simulationName, "UTF-8") + "&"
+//			    + "x=" + URLEncoder.encode(Integer.toString(fieldSize), "UTF-8") + "&"
+//			    + "y=" + URLEncoder.encode(Integer.toString(fieldSize), "UTF-8") + "&"
+//			    + "timestep=" + URLEncoder.encode(Integer.toString(stepSize), "UTF-8");
+//			
+//		System.out.println(param);
+//		
+//		URL url = new URL(hostUrl + "?" + param);
 //		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//		connection.setRequestMethod("POST");
+//		connection.setRequestMethod("GET");
 //		connection.setDoInput(true);
 //		connection.setDoOutput(true);
 //		connection.setUseCaches(false);
 //		connection.setRequestProperty("Content-Type", "application/json");
-//		
-//		String param = 
-//			"collection=" + URLEncoder.encode(simulationName, "UTF-8") + "&"
-//		    + "x=" + URLEncoder.encode(Integer.toString(fieldSize), "UTF-8") + "&"
-//		    + "y=" + URLEncoder.encode(Integer.toString(fieldSize), "UTF-8") + "&"
-//		    + "timestep=" + URLEncoder.encode(Integer.toString(stepSize), "UTF-8");
-//		
+			
+		//onle for POST-Requests
 //		OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
 //		writer.write(param);
 //		writer.flush();
-//		
+		
+		
+		
 //		return connection.getInputStream();
 		
 //		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
