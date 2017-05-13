@@ -27,12 +27,7 @@ class DataProcessor extends java.io.Serializable {
 
   def transformGrid(gridRequest: GridRequest): String = {
 
-    // Create a SparkContext using every core of the local machine
-    val sc = new SparkContext("local[*]", "DataProcessor")
-    val config = ConfigFactory.load()
-
-    val readConfig = new ReadConfig(config.getString("mongodb.db"), gridRequest.collection, Some(config.getString("mongodb.uri")))
-    val rdd = MongoSpark.load(sc, readConfig)
+    val rdd = loadRDD(gridRequest)
 
     val columns = extractConfig(rdd)
     val antsPos = extractAntPos(rdd)
@@ -101,6 +96,15 @@ class DataProcessor extends java.io.Serializable {
 
     return parseToJson(gridRepresentation)
   }
+
+  private def loadRDD(gridRequest: GridRequest): MongoRDD[Document] = {
+      // Create a SparkContext using every core of the local machine
+      val sc = new SparkContext("local[*]", "DataProcessor")
+      val config = ConfigFactory.load()
+      val readConfig = new ReadConfig(config.getString("mongodb.db"), gridRequest.collection, Some(config.getString("mongodb.uri")))
+      return MongoSpark.load(sc, readConfig)
+  }
+
 
   private def parseToJson(gridRep: List[GridRepresentation]): String = {
 

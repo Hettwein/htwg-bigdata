@@ -30,7 +30,7 @@ object GridResource {
             val json = parse(gridRequest)
             val mapper = new ObjectMapper() with ScalaObjectMapper
             mapper.registerModule(DefaultScalaModule)
-            val  grid= mapper.readValue(gridRequest,classOf[GridRequest])
+            val grid = mapper.readValue(gridRequest, classOf[GridRequest])
 
             //val gridrequest = json.extract[GridRequest]
             val dataProcessor = new DataProcessor
@@ -41,6 +41,7 @@ object GridResource {
             }
           }
         }
+
 
       }
 
