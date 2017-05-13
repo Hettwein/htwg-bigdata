@@ -45,3 +45,7 @@ WorkerServer/.settings/
 WorkerServer/LICENSE
 WorkerServer/Procfile
 WorkerServer/project/
+.recommenders/
+visualisationclient/.project
+visualisationclient/.settings/
+visualisationclient/.classpath
