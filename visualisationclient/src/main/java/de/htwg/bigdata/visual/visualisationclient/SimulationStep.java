@@ -5,8 +5,8 @@ public class SimulationStep {
 	private int time;
 	private double[][] fields;
 	
-	public SimulationStep(int id, int time, int fieldSize) {
-		this.step = id;
+	public SimulationStep(int step, int time, int fieldSize) {
+		this.step = step;
 		this.time = time;
 		fields = new double[fieldSize][fieldSize];
 	}
@@ -15,9 +15,16 @@ public class SimulationStep {
 		
 		if (x > fields.length - 1 ) { throw new RuntimeException("x to big"); }
 		if (y > fields[x].length - 1) { throw new RuntimeException("y to big"); }
-		if (concentration < 0) { throw new RuntimeException("concentration should not be negative"); }
+		if (concentration < 0) { throw new RuntimeException("concentration should not be negative"); }	  				  		
 		
-		fields[x][y] = (double) concentration;
+		try {
+			fields[x][y] = (double) concentration;
+		} catch (Exception e) {
+			System.out.println("x: " + x);
+			System.out.println("y: " + y);
+			System.out.println("concentration: " + concentration);		  				  		
+			System.out.println(e);			
+		}
 		
 	}
 	

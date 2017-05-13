@@ -14,9 +14,6 @@ public class Controller {
 	}
 	
 	public List<SimulationStep> getSimulationData(String simulationName, int fieldSize, int stepSize) {
-		System.out.println(simulationName);
-		System.out.println(fieldSize);
-		System.out.println(stepSize);
 		parser = new InputStreamParser(fieldSize);
 		try {
 			return parser.getData(connector.getSimulationData(simulationName, fieldSize, stepSize));

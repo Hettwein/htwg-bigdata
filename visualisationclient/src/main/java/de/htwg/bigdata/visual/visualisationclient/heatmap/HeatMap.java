@@ -355,14 +355,20 @@ public class HeatMap extends JPanel
         // in order to assign proper colors.
         double largest = Double.MIN_VALUE;
         double smallest = Double.MAX_VALUE;
-        for (int x = 0; x < data.length; x++)
-        {
-            for (int y = 0; y < data[0].length; y++)
-            {
-                largest = Math.max(data[x][y], largest);
-                smallest = Math.min(data[x][y], smallest);
-            }
-        }
+//        for (int x = 0; x < data.length; x++)
+//        {
+//            for (int y = 0; y < data[0].length; y++)
+//            {
+//                largest = Math.max(data[x][y], largest);
+//                smallest = Math.min(data[x][y], smallest);
+//            }
+//        }
+        
+        //Ant-Concentration always between 0 and 100
+        smallest = 0.0;
+        largest = 100.0;
+        
+        
         double range = largest - smallest;
 
         // dataColorIndices is the same size as the data array

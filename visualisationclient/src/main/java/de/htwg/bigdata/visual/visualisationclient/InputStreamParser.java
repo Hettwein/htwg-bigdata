@@ -21,8 +21,10 @@ public class InputStreamParser {
 		List<SimulationStep> data = new LinkedList<SimulationStep>();
 		
 		JsonReader reader = Json.createReader(is);
-		JsonObject obj = reader.readObject();
-		JsonArray steps = obj.getJsonArray("steps");
+		//JsonObject obj = reader.readObject();
+		JsonArray steps = reader.readArray();
+		//JsonArray steps = obj.getJsonArray("");
+//		JsonArray steps = obj.getJsonArray("steps");
 		for (JsonObject step : steps.getValuesAs(JsonObject.class)) {
 			int id = step.getInt("step");
 			int time = step.getInt("time");
@@ -30,9 +32,9 @@ public class InputStreamParser {
 			JsonArray fields = step.getJsonArray("fields");
 			for (JsonObject field : fields.getValuesAs(JsonObject.class)) {
 				simulationStep.setField(
-						field.getInt("x"), 
-						field.getInt("y"), 
-						field.getInt("cocentration")
+						field.getInt("newX"), 
+						field.getInt("newY"), 
+						field.getInt("concentration")
 				);
 			}
 			data.add(simulationStep);
