@@ -22,17 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.io.StringWriter
 
-
-
-class DataProcessor extends java.io.Serializable{
+class DataProcessor extends java.io.Serializable {
   case class GridRepresentation(step: Int, time: Long, fields: Array[Document])
 
-  
-  
-  def transformGrid(gridRequest: GridRequest):String = {
-    
+  def transformGrid(gridRequest: GridRequest): String = {
+
     // Create a SparkContext using every core of the local machine
-    val sc = new SparkContext("local[*]", "WordCount")
+    val sc = new SparkContext("local[*]", "DataProcessor")
     val config = ConfigFactory.load()
 
     val readConfig = new ReadConfig(config.getString("mongodb.db"), gridRequest.collection, Some(config.getString("mongodb.uri")))
@@ -40,6 +36,9 @@ class DataProcessor extends java.io.Serializable{
 
     val columns = extractConfig(rdd)
     val antsPos = extractAntPos(rdd)
+
+    //(3,123)
+    //(3,222)  <---
     val antNumber = antsPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
       .map(item => item.swap).sortByKey(false, 1)
       .map(item => item.swap)
@@ -54,80 +53,65 @@ class DataProcessor extends java.io.Serializable{
     var gridRepresentation = List[GridRepresentation]()
     var stepCount = 1
     do {
-      
+      //current Pos for each timestep
       val currentPos = antsPos.filter(doc => filterCurrentPos(doc, currentMillis))
-      val currentAntsTuple = currentPos.map(doc => (doc.getString("id").toInt, doc.getLong("timestamp").toInt))
-        .map(item => item.swap).sortByKey(false, 1)
-        .map(item => item.swap)
-        .reduceByKey((a: Int, b: Int) => a)
 
-      val ants = currentAntsTuple.collect()
+      // sort by timestamp, reduce by id
+      //(3,123)
+      //(3,222)  <---
+      val currentAnts = currentPos
+        .map(doc => (doc.getLong("timestamp").toInt, doc))
+        .sortByKey(false, 1)
+        .map(t => ((t._2.getString("id").toInt, t._2)))
+        .reduceByKey((a: Document, b: Document) => a)
 
-      val currentAnts = currentPos.filter(doc => {
-        val id = doc.getString("id").toInt;
-        val timestamp = doc.getLong("timestamp").toInt
-        ants.contains((id, timestamp))
-      })
+      currentAnts.foreach(doc => println("current Ants:" + doc))
 
       //calculate new x and y
-      val currentAnts2 = currentAnts.map(doc =>
+      // newX=x*ratio
+      val transormedGrid = currentAnts.map(t =>
         {
+          var doc = t._2
           doc.append("newX", (doc.getInteger("x") * ratio).toInt)
           doc.append("newY", (doc.getInteger("y") * ratio).toInt)
           doc.append("posID", (doc.get("newX").toString() + "_" + doc.get("newY").toString()))
         }).map(doc => (doc.get("posID").toString().hashCode(), doc))
+        .reduceByKey((doc: Document, doc2: Document) => doc)
 
-      val currentAnts3 = currentAnts2.reduceByKey((doc: Document, doc2: Document) => doc)
-      val antCount = currentAnts2.countByKey()
+      //(id,count)
+      val antCount = transormedGrid.countByKey()
 
-      val currentsAnts4 = currentAnts3.map(doc => {
+      //calculate concentration
+      val newGrid = transormedGrid.map(doc => {
         doc._2.append("ants", (antCount.get(doc._1)) match {
           case Some(x: Long) => x // this extracts the value in a as an Int
           case _             => 0L
         })
-        var conc=doc._2.getLong("ants").toFloat/ antNumber*100
+        var conc = doc._2.getLong("ants").toFloat / antNumber * 100
         doc._2.append("concentration", conc)
       })
 
-
-      currentsAnts4.foreach(doc => println(doc))
-      antCount.foreach(doc => println(doc))
-      println(antNumber)
       //build json
-
-      val step = GridRepresentation(stepCount, currentMillis, currentsAnts4.collect())
+      val step = GridRepresentation(stepCount, currentMillis, newGrid.collect())
       gridRepresentation ::= step
 
       currentMillis += gridRequest.timestep
       stepCount = stepCount + 1
     } while (currentMillis <= lastTimestamp)
 
-    gridRepresentation.foreach(g => println(g))
     return parseToJson(gridRepresentation)
   }
-  
-  private def parseToJson(gridRep:List[GridRepresentation]):String={
-    
+
+  private def parseToJson(gridRep: List[GridRepresentation]): String = {
+
     val mapper = new ObjectMapper()
     mapper.registerModule(DefaultScalaModule)
-    val out=new StringWriter
+    val out = new StringWriter
     mapper.writeValue(out, gridRep)
-    
-    
-    
-    
-    
-    val json=out.toString()
-        println(json)
-//    
-//                  
-//    
-//    
-//    
-//    compact(render(json))
+
+    val json = out.toString()
     return json
   }
-
 
   private def extractConfig(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("rows"))
   private def extractAntPos(rdd: MongoRDD[Document]) = rdd.filter(doc => doc.containsKey("x"))
