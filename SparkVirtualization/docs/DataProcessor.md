@@ -7,11 +7,11 @@ This class contains methods to calculate the concentration of the ants within th
 
 Name | Return Value | Description
 ------------ | ------------- | -------------
-[**transformGrid**](DataProcessor.md#transformGrid) | parseToJson | calculates concentration of ants |
-[**laodRDD**](DataProcessor.md#loadRDD) | MongoSpark | creates connection to MongoDB and sets configurations |
-[**parseToJson**](DataProcessor.md#parseToJson) | Json | parses GridRepresentattion to Json |
-[**extractConfig**](DataProcessor.md#extractConfig) | RDD | extracts the configuration parameter out of the database |
-[**extractAntPos**](DataProcessor.md#extractAntPos) | RDD | extracts all positions out of the database |
+[**transformGrid**](DataProcessor.md#transformGrid) | String | calculates concentration of ants |
+[**laodRDD**](DataProcessor.md#loadRDD) | MongoRDD[Document] | creates connection to MongoDB and sets configurations |
+[**parseToJson**](DataProcessor.md#parseToJson) | String | parses GridRepresentattion to Json |
+[**extractConfig**](DataProcessor.md#extractConfig) | MongoRDD[Document] | extracts the configuration parameter out of the database |
+[**extractAntPos**](DataProcessor.md#extractAntPos) | MongoRDD[Document] | extracts all positions out of the database |
 [**filterCurrentPos**](DataProcessor.md#filterCurrentPos) | Boolean | finds the current position of each ant |
 
 
@@ -38,7 +38,7 @@ Defines the SparkContext and configuration for the Database.
 ### parameters
 Name | Type | Description
 ------------- | ------------- | -------------
- **GridRequest** | **gridRequest**| requested Grid for visualisation |
+ **gridRequest** | **GridRequest**| class GridRequest(collection: String, x: Int, y: Int, timestep: Int) |
 
 ### Return type
 MongoRDD[Document]
@@ -53,7 +53,7 @@ This method parses the transferred data to Json
 ### parameters
 Name | Type | Description
 ------------- | ------------- | -------------
- **gridRep** | **List[GridRepresentation]**| List of class GridRepresentation (step: Int, time: Long, fields: Array[Document]) |
+ **gridRep** | **List[GridRepresentation]**| class GridRepresentation (step: Int, time: Long, fields: Array[Document]) |
 
 ### Return type
 String
@@ -101,13 +101,14 @@ Filters all positions and finds the current position of each Ant.
 ### parameters
 Name | Type | Description
 ------------- | ------------- | -------------
-**gridRequest** | **GridRequest**|  |
+**gridRequest** | **GridRequest**| class GridRequest(collection: String, x: Int, y: Int, timestep: Int) |
 **doc** | **Document**|  |
 **currentMillis** | **long**| timestamp in milliseconds |
 
 
 ### Return type
-**true**: if the position within the document is the current position of the ant 
+**true**: if the position within the document is the current position of the ant
+ 
 **false**: if the position within the document isn't the current position of the ant
 
 

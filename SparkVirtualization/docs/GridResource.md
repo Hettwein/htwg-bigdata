@@ -1,7 +1,5 @@
 # GridResource
 
-This class   
-
 
 ## methods
 
