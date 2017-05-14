@@ -7,37 +7,22 @@ This class
 
 Name | Return Value | Description
 ------------ | ------------- | -------------
-[**main**](GridResource#main) | parseToJson | calculates concentration of ants |
+[**main**](GridResource.md#main) | - | executes the DataProcesssing |
 
 
-# **transformGrid**
-> DataProcessor transformGrid (gridRequest: GridRequest)
+# **main**
+> DataProcessor main (args: Array[String])
 
-Description
-
-### parameters
-Name | Type | Description
-------------- | ------------- | -------------
- **GridRequest** | **GridRequest**| Contains a Collection of Strings, coordinates x (int) and y (int) and a timestep (int) |
-
-### Return type
-[**String**]
-
-
-
-# **loadRDD**
-> DataProcessor loadRDD (gridRequest: GridRequest)
-
-Defines the SparkContext and the Configuration for the Database. 
+The main method executes the methods defined in the [**DataProcessor**](DataProcessor.md) class
 
 ### parameters
 Name | Type | Description
 ------------- | ------------- | -------------
- **GridRequest** | **gridRequest**| requested Grid for visualisation |
-
+ **args** | **Array[String]**|  |
 
 ### Return type
-[**MongoRDD[Document]**]
+The main method does not return a value (it is a procedure method). 
+
 
 
 

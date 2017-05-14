@@ -8,17 +8,17 @@ This class contains methods to calculate the concentration of the ants within th
 Name | Return Value | Description
 ------------ | ------------- | -------------
 [**transformGrid**](DataProcessor.md#transformGrid) | parseToJson | calculates concentration of ants |
-[**laodRDD**](DataProcessor.md#loadRDD) | MongoSpark | creates Connection to MongoDB and sets Configurations |
+[**laodRDD**](DataProcessor.md#loadRDD) | MongoSpark | creates connection to MongoDB and sets configurations |
 [**parseToJson**](DataProcessor.md#parseToJson) | Json | parses GridRepresentattion to Json |
-[**extractConfig**](DataProcessor.md#extractConfig) | RDD |  |
-[**extractAntPos**](DataProcessor.md#extractAntPos) | RDD |  |
-[**filterCurrentPos**](DataProcessor.md#filterCurrentPos) | Boolean |  |
+[**extractConfig**](DataProcessor.md#extractConfig) | RDD | extracts the configuration parameter out of the database |
+[**extractAntPos**](DataProcessor.md#extractAntPos) | RDD | extracts all positions out of the database |
+[**filterCurrentPos**](DataProcessor.md#filterCurrentPos) | Boolean | finds the current position of each ant |
 
 
 # **transformGrid**
 > DataProcessor transformGrid (gridRequest: GridRequest)
 
-Description
+Calculates the concentration for each intervall. The concentration is defined as the number of ants in each part of the Grid at a given period of time. The data is stored and transferred in Json.
 
 ### parameters
 Name | Type | Description
@@ -33,28 +33,22 @@ Name | Type | Description
 # **loadRDD**
 > DataProcessor loadRDD (gridRequest: GridRequest)
 
-Defines the SparkContext and the Configuration for the Database. 
+Defines the SparkContext and configuration for the Database. 
 
 ### parameters
 Name | Type | Description
 ------------- | ------------- | -------------
  **GridRequest** | **gridRequest**| requested Grid for visualisation |
 
-
 ### Return type
 [**MongoRDD[Document]**]
-
-
 
 
 
 # **parseToJson**
 > DataProcessor parseToJson (gridRep: List[GridRepresentation])
 
-The method parseToJson parse a List of GridRepresentation. GridRepresentation is a case class with the params 
-step: Int 
-time: Long 
-fields: Array[Document])
+This method parses the transferred data to Json
 
 ### parameters
 Name | Type | Description
@@ -69,7 +63,7 @@ Name | Type | Description
 # **extractConfig**
 > DataProcessor extractConfig (rdd: MongoRDD[Document])
 
-Extracts the Config-Document out of the database.
+Extracts the Configuration parameters out of the database.
 
 ### parameters
 Name | Type | Description
