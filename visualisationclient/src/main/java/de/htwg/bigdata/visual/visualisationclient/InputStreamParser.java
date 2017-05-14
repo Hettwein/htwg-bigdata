@@ -22,20 +22,13 @@ public class InputStreamParser {
 		List<SimulationStep> data = new LinkedList<SimulationStep>();
 		
 		JsonReader reader = Json.createReader(is);
-		//JsonObject obj = reader.readObject();
 		JsonArray steps = reader.readArray();
-		//JsonArray steps = obj.getJsonArray("");
-//		JsonArray steps = obj.getJsonArray("steps");
-		System.out.println("InputStreamParser: Beginne Steps zu laden");
 		for (JsonObject step : steps.getValuesAs(JsonObject.class)) {
-			System.out.println("Äußere Vorschleife");
 			int id = step.getInt("step");
 			int time = step.getInt("time");
 			SimulationStep simulationStep = new SimulationStep(id, time, fieldSize);
 			JsonArray fields = step.getJsonArray("fields");
 			for (JsonObject field : fields.getValuesAs(JsonObject.class)) {
-				System.out.println("innere Vorschleife");
-				System.out.println(field);
 				simulationStep.setField(
 						field.getInt("newX"), 
 						field.getInt("newY"), 
@@ -43,17 +36,14 @@ public class InputStreamParser {
 				);
 			}
 			data.add(simulationStep);
-			System.out.println("Step " + id + " geladen");
 		}
 		
-		System.out.println("Datenset wird sortiert");
 		data.sort(new Comparator<SimulationStep>() {
 			public int compare(SimulationStep arg0, SimulationStep arg1) {
 				return arg0.compareTo(arg1);				
 			}			
 		});
 		
-		System.out.println("Datenset wird zurückgegeben");
 		return data;
 		
 	}

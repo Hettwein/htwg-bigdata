@@ -18,12 +18,6 @@ public class Connector {
 	public InputStream getSimulationData(String simulationName, int fieldSize, int stepSize) throws IOException {
 		
 //		return this.getSimulationDataFromFile();
-		
-//		String param = 
-//				"collection=" + URLEncoder.encode(simulationName, "UTF-8") + "&"
-//			    + "x=" + URLEncoder.encode(Integer.toString(fieldSize), "UTF-8") + "&"
-//			    + "y=" + URLEncoder.encode(Integer.toString(fieldSize), "UTF-8") + "&"
-//			    + "timestep=" + URLEncoder.encode(Integer.toString(stepSize), "UTF-8");
 			
 		String param = 
 				"{\"collection\":\"" + URLEncoder.encode(simulationName, "UTF-8") + "\","
@@ -32,9 +26,6 @@ public class Connector {
 			    + "\"timestep\":\"" + URLEncoder.encode(Integer.toString(stepSize), "UTF-8") + "\"}";
 		
 		
-		System.out.println(param);
-		
-//		URL url = new URL(hostUrl + "?" + param);
 		URL url = new URL(hostUrl);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("POST");
@@ -51,14 +42,6 @@ public class Connector {
 		
 		return connection.getInputStream();
 		
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//		
-//		String line = reader.readLine();
-//		while (line != null) {
-//			System.out.println(line);
-//			line = reader.readLine();
-//		}
-		
 	}
 	
 	
@@ -66,9 +49,7 @@ public class Connector {
 		
 		File f = new File("D:/Projekte/bigdata/visualisationclient/simulation.json");
 		
-		System.out.println("InputStream wird geladen");
 		InputStream in = new FileInputStream(f);
-		System.out.println("Inputstream geladen");
 		
 		return in;
 		

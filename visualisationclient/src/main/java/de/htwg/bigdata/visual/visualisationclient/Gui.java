@@ -47,15 +47,22 @@ public class Gui extends JFrame {
 	    mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 //	    JPanel paramPanel = new JPanel(new GridLayout(4, 2));
 	    JPanel paramPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	    
 	    paramPanel.add(new JLabel("Simulation name"));
 	    final JTextField simulationName = new JTextField(20);
 	    paramPanel.add(simulationName);
+	   
 	    paramPanel.add(new JLabel("Fieldsize"));
 	    final JTextField fieldSize = new JTextField(10);
 	    paramPanel.add(fieldSize);
+	    
 	    paramPanel.add(new JLabel("Stepsize"));
 	    final JTextField stepSize = new JTextField(10);
 	    paramPanel.add(stepSize);
+	    
+	    paramPanel.add(new JLabel("Timefactor"));
+	    final JTextField timefactor = new JTextField(10);
+	    paramPanel.add(timefactor);
 
 	    //Go-Button
 	    JButton go = new JButton("Go");
@@ -134,18 +141,14 @@ public class Gui extends JFrame {
 	    	private int stepSize;
 	    	
 	    	public SimulationLoader(String simulationName, int fieldSize, int stepSize) {
-	    		System.out.println("SimulationLoader-Konstruktor");
 	    		this.simulationName = simulationName;
 	    		this.fieldSize = fieldSize;
 	    		this.stepSize = stepSize;
 	    	}
 	    	
 			@Override
-			protected Void doInBackground() throws Exception {
-				
-				System.out.println("SimulationLoader: Starte Daten im Controller zu laden");
+			protected Void doInBackground() throws Exception {				
 				controller.loadSimulationData(simulationName, fieldSize, stepSize);	
-				System.out.println("SimulationLoader: Fertig mit Daten laden im Controller");
 				
 				if (fieldSize < defaultFieldSize) {
 					heatMapPanel.setSize(defaultFieldSize, defaultFieldSize);
@@ -153,9 +156,7 @@ public class Gui extends JFrame {
 					heatMapPanel.setSize(fieldSize, fieldSize);
 				}
 				
-				System.out.println("SimulationPlayer wird initialisiert.");
 				simulationPlayer = new SimulationPlayer(stepSize);
-				System.out.println("SimulationPlayer wird gestartet.");
 				simulationPlayer.execute();
 				
 				return null;

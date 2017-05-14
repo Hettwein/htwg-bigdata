@@ -14,8 +14,9 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 case class GridRequest(collection: String, x: Int, y: Int, timestep: Int)
 
-object GridResource {
+object GridResource extends java.io.Serializable {
   implicit val formats = DefaultFormats
+ 
   def main(args: Array[String]) {
 
     implicit val system = ActorSystem("my-system")
@@ -33,6 +34,7 @@ object GridResource {
             val grid = mapper.readValue(gridRequest, classOf[GridRequest])
 
             //val gridrequest = json.extract[GridRequest]
+            
             val dataProcessor = new DataProcessor
             val newGrid = dataProcessor.transformGrid(grid)
 
