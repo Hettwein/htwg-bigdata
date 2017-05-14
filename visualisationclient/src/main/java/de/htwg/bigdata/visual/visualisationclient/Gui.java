@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,6 +28,7 @@ public class Gui extends JFrame {
 	private final int defaultFieldSize = 500;
 	SimulationLoader simulationLoader;
 	SimulationPlayer simulationPlayer;
+	private final JTextField state;
 	
 	public Gui(final Controller controller) throws Exception {
 
@@ -34,9 +36,7 @@ public class Gui extends JFrame {
 	 
 		Color[] gradientWhiteToBlack = Gradient.createGradient(Color.WHITE, Color.BLACK, 100);
 		
-//		heatMapPanel = new HeatMap(new double[defaultFieldSize][defaultFieldSize], useGraphicsYAxis, Gradient.GRADIENT_BLACK_TO_WHITE);
 		heatMapPanel = new HeatMap(new double[defaultFieldSize][defaultFieldSize], useGraphicsYAxis, gradientWhiteToBlack);
-//		heatMapPanel = new HeatMap(new double[defaultFieldSize][defaultFieldSize], useGraphicsYAxis, Gradient.GRADIENT_GREEN_YELLOW_ORANGE_RED);
 	    heatMapPanel.setSize(defaultFieldSize, defaultFieldSize);
 	    heatMapPanel.setColorForeground(Color.WHITE);
 	    heatMapPanel.setColorBackground(Color.WHITE);
@@ -45,23 +45,34 @@ public class Gui extends JFrame {
 	    Container contentPane = this.getContentPane();	    	    
 	    JPanel mainPanel = new JPanel();	
 	    mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-//	    JPanel paramPanel = new JPanel(new GridLayout(4, 2));
 	    JPanel paramPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	    JPanel statePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	    
+	    statePanel.add(new JLabel("State"));
+	    state = new JTextField(40);
+	    state.setText("Ready");
+	    statePanel.add(state);
 	    
 	    paramPanel.add(new JLabel("Simulation name"));
 	    final JTextField simulationName = new JTextField(20);
 	    paramPanel.add(simulationName);
 	   
+	    final JCheckBox cbLoadFromFile = new JCheckBox("Load JSON from file", false);
+	    paramPanel.add(cbLoadFromFile);
+	    
 	    paramPanel.add(new JLabel("Fieldsize"));
 	    final JTextField fieldSize = new JTextField(10);
+	    fieldSize.setText("50");
 	    paramPanel.add(fieldSize);
 	    
 	    paramPanel.add(new JLabel("Stepsize"));
 	    final JTextField stepSize = new JTextField(10);
+	    stepSize.setText("100");
 	    paramPanel.add(stepSize);
 	    
 	    paramPanel.add(new JLabel("Timefactor"));
 	    final JTextField timefactor = new JTextField(10);
+	    timefactor.setText("1");
 	    paramPanel.add(timefactor);
 
 	    //Go-Button
@@ -71,7 +82,9 @@ public class Gui extends JFrame {
 				simulationLoader = new SimulationLoader(
 						simulationName.getText(), 
 						Integer.valueOf(fieldSize.getText()), 
-						Integer.valueOf(stepSize.getText()));
+						Integer.valueOf(stepSize.getText()),
+						Integer.valueOf(timefactor.getText()),
+						cbLoadFromFile.isSelected());
 				simulationLoader.execute();
 													
 			}    	
@@ -83,6 +96,8 @@ public class Gui extends JFrame {
 	    stop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (simulationPlayer != null) { simulationPlayer.cancel(true); }
+				if (simulationLoader != null) { simulationLoader.cancel(true); }
+				state.setText("Ready");
 			}
 	    	
 	    });
@@ -92,14 +107,14 @@ public class Gui extends JFrame {
 	    JButton play = new JButton("Play");
 	    play.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				simulationPlayer = new SimulationPlayer(controller.getStepSize());
+				simulationPlayer = new SimulationPlayer(Math.round(controller.getStepSize() / Integer.valueOf(timefactor.getText())));
 				simulationPlayer.execute();
 			}	    	
 	    });
 	    paramPanel.add(play);
 	    
 	    //Prev-Button
-	    JButton prev = new JButton("Prev");
+	    JButton prev = new JButton("Previous Step");
 	    prev.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!simulationPlayer.isCancelled()) { return; }
@@ -109,16 +124,53 @@ public class Gui extends JFrame {
 	    paramPanel.add(prev);
 	    
 	    //Next-Button
-	    JButton next = new JButton("Next");
+	    JButton next = new JButton("Next Step");
 	    next.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!simulationPlayer.isCancelled()) { return; }
 				heatMapPanel.updateData(controller.getNextStep().getFields(), useGraphicsYAxis);
 			}	    	
 	    });
-	    paramPanel.add(next);	    	    
+	    paramPanel.add(next);
 	    
-	    mainPanel.add(paramPanel);	    	    
+	    //Play from begin-Button
+	    JButton playFromBegin = new JButton("Play from begin");
+	    playFromBegin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.resetSimulation();
+				simulationPlayer = new SimulationPlayer(Math.round(controller.getStepSize() / Integer.valueOf(timefactor.getText())));
+				simulationPlayer.execute();
+			}	    	
+	    });
+	    paramPanel.add(playFromBegin);	
+	    
+	    paramPanel.add(new JLabel("RGB start from"));
+	    final JTextField rgbStartFrom = new JTextField(5);
+	    rgbStartFrom.setText("200");
+	    paramPanel.add(rgbStartFrom);
+	    
+	    paramPanel.add(new JLabel("RGB stepsize"));
+	    final JTextField rgbStepSize = new JTextField(5);
+	    rgbStepSize.setText("30");
+	    paramPanel.add(rgbStepSize);
+	    
+	    //Apply-RGB-Button
+	    JButton applyRGB = new JButton("Apply RGB");
+	    applyRGB.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {				
+				heatMapPanel.updateGradient(Gradient.createSpecialGradient(
+						Integer.valueOf(rgbStartFrom.getText()), 
+						Integer.valueOf(rgbStepSize.getText())
+				));
+			}	    	
+	    });
+	    paramPanel.add(applyRGB);	    
+
+
+	    
+	    
+	    mainPanel.add(paramPanel);	 
+	    mainPanel.add(statePanel);
 	    mainPanel.add(heatMapPanel);	   
 	    contentPane.add(mainPanel);
 	   
@@ -139,16 +191,21 @@ public class Gui extends JFrame {
 	    	private String simulationName;
 	    	private int fieldSize;
 	    	private int stepSize;
+	    	private int timeFactor;
+	    	private boolean loadFromFile;
 	    	
-	    	public SimulationLoader(String simulationName, int fieldSize, int stepSize) {
+	    	public SimulationLoader(String simulationName, int fieldSize, int stepSize, int timeFactor, boolean loadFromFile) {
 	    		this.simulationName = simulationName;
 	    		this.fieldSize = fieldSize;
 	    		this.stepSize = stepSize;
+	    		this.timeFactor = timeFactor;
+	    		this.loadFromFile = loadFromFile;
 	    	}
 	    	
 			@Override
 			protected Void doInBackground() throws Exception {				
-				controller.loadSimulationData(simulationName, fieldSize, stepSize);	
+				state.setText("Load simulation data...");
+				controller.loadSimulationData(simulationName, fieldSize, stepSize, loadFromFile);	
 				
 				if (fieldSize < defaultFieldSize) {
 					heatMapPanel.setSize(defaultFieldSize, defaultFieldSize);
@@ -156,7 +213,7 @@ public class Gui extends JFrame {
 					heatMapPanel.setSize(fieldSize, fieldSize);
 				}
 				
-				simulationPlayer = new SimulationPlayer(stepSize);
+				simulationPlayer = new SimulationPlayer(Math.round(stepSize / timeFactor));
 				simulationPlayer.execute();
 				
 				return null;
@@ -167,13 +224,13 @@ public class Gui extends JFrame {
 			private int stepSize;
 			
 			public SimulationPlayer(int stepSize) {
-				this.stepSize = stepSize;
+				this.stepSize = stepSize;				
 			}
 			
 			
 			@Override
 			protected Void doInBackground() throws Exception {
-				System.out.println("SimulationPlayer gestartet.");
+				state.setText("Start simulation replay...");
 				SimulationStep step = controller.getNextStep();
 				while (step != null) {
 					heatMapPanel.updateData(step.getFields(), useGraphicsYAxis);

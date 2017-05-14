@@ -38,16 +38,15 @@ public class Connector {
 		OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
 		writer.write(param);
 		writer.flush();
-		
-		
+				
 		return connection.getInputStream();
 		
 	}
 	
 	
-	public InputStream getSimulationDataFromFile() throws FileNotFoundException {
+	public InputStream getSimulationDataFromFile(String simulationName) throws FileNotFoundException {
 		
-		File f = new File("D:/Projekte/bigdata/visualisationclient/simulation.json");
+		File f = new File(simulationName + ".json");
 		
 		InputStream in = new FileInputStream(f);
 		

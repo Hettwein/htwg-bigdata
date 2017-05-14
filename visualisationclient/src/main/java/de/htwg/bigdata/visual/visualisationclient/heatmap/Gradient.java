@@ -166,4 +166,24 @@ public class Gradient
 
         return gradient;
     }
+
+	public static Color[] createSpecialGradient(int startFromRGB, int stepRGB) {
+	
+		Color[] result = new Color[100];
+		int currentRGB = startFromRGB;
+		
+		result[0] = new Color(255, 255, 255);		
+		
+		for (int i = 1; i < result.length - 20; i++) {
+			result[i] = new Color(Math.max(0, currentRGB), Math.max(0, currentRGB), Math.max(0, currentRGB));
+			currentRGB -= stepRGB;
+		}
+		
+		for (int i = result.length - 20; i < result.length; i++) {
+			result[i] = new Color(255, 0, 0);			
+		}				
+		
+		return result;
+	}
+	
 }
