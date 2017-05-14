@@ -16,7 +16,7 @@ Name | Return Value | Description
 
 
 # **transformGrid**
-> DataProcessor transformGrid (gridRequest: GridRequest)
+> String transformGrid (gridRequest: GridRequest)
 
 Calculates the concentration for each intervall. The concentration is defined as the number of ants in each part of the Grid at a given period of time. The data is stored and transferred in Json.
 
@@ -26,12 +26,12 @@ Name | Type | Description
  **GridRequest** | **GridRequest**| Contains a Collection of Strings, coordinates x (int) and y (int) and a timestep (int) |
 
 ### Return type
-[**String**]
+String
 
 
 
 # **loadRDD**
-> DataProcessor loadRDD (gridRequest: GridRequest)
+> MongoRDD[Document] loadRDD (gridRequest: GridRequest)
 
 Defines the SparkContext and configuration for the Database. 
 
@@ -41,12 +41,12 @@ Name | Type | Description
  **GridRequest** | **gridRequest**| requested Grid for visualisation |
 
 ### Return type
-[**MongoRDD[Document]**]
+MongoRDD[Document]
 
 
 
 # **parseToJson**
-> DataProcessor parseToJson (gridRep: List[GridRepresentation])
+> String parseToJson (gridRep: List[GridRepresentation])
 
 This method parses the transferred data to Json
 
@@ -56,12 +56,12 @@ Name | Type | Description
  **gridRep** | **List[GridRepresentation]**| List of class GridRepresentation (step: Int, time: Long, fields: Array[Document]) |
 
 ### Return type
-[**String**]
+String
 
 
 
 # **extractConfig**
-> DataProcessor extractConfig (rdd: MongoRDD[Document])
+> MongoRDD[Document] extractConfig (rdd: MongoRDD[Document])
 
 Extracts the Configuration parameters out of the database.
 
@@ -72,12 +72,12 @@ Name | Type | Description
 
 
 ### Return type
-[**MongoRDD[Document]**]
+MongoRDD[Document]
 
 
 
 # **extractAntPos**
-> DataProcessor extractAntPos (rdd: MongoRDD[Document])
+> MongoRDD[Document] extractAntPos (rdd: MongoRDD[Document])
 
 Extracts all positions of the Ants out of the database.
 
@@ -88,13 +88,13 @@ Name | Type | Description
 
 
 ### Return type
-[**MongoRDD[Document]**]
+MongoRDD[Document]
 
 
 
 
 # **filterCurrentPos**
-> DataProcessor filterCurrentPos (gridRequest: GridRequest,doc: Document, currentMillis: Long)
+> Boolean filterCurrentPos (gridRequest: GridRequest,doc: Document, currentMillis: Long)
 
 Filters all positions and finds the current position of each Ant.
 

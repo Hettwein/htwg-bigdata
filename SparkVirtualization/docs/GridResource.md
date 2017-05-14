@@ -7,11 +7,11 @@ This class
 
 Name | Return Value | Description
 ------------ | ------------- | -------------
-[**main**](GridResource.md#main) | - | executes the DataProcesssing |
+[**main**](GridResource.md#main) | - | executes the Grid |
 
 
 # **main**
-> DataProcessor main (args: Array[String])
+> main (args: Array[String])
 
 The main method executes the methods defined in the [**DataProcessor**](DataProcessor.md) class
 
