@@ -26,7 +26,7 @@ object GridResource {
     val route =
       path("grid") {
         decodeRequest {
-          (get & entity(as[String])) { gridRequest: String =>
+          (post & entity(as[String])) { gridRequest: String =>
             val json = parse(gridRequest)
             val mapper = new ObjectMapper() with ScalaObjectMapper
             mapper.registerModule(DefaultScalaModule)

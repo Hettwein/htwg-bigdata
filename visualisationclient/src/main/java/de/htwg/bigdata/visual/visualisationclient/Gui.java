@@ -36,6 +36,7 @@ public class Gui extends JFrame {
 		
 //		heatMapPanel = new HeatMap(new double[defaultFieldSize][defaultFieldSize], useGraphicsYAxis, Gradient.GRADIENT_BLACK_TO_WHITE);
 		heatMapPanel = new HeatMap(new double[defaultFieldSize][defaultFieldSize], useGraphicsYAxis, gradientWhiteToBlack);
+//		heatMapPanel = new HeatMap(new double[defaultFieldSize][defaultFieldSize], useGraphicsYAxis, Gradient.GRADIENT_GREEN_YELLOW_ORANGE_RED);
 	    heatMapPanel.setSize(defaultFieldSize, defaultFieldSize);
 	    heatMapPanel.setColorForeground(Color.WHITE);
 	    heatMapPanel.setColorBackground(Color.WHITE);
@@ -133,6 +134,7 @@ public class Gui extends JFrame {
 	    	private int stepSize;
 	    	
 	    	public SimulationLoader(String simulationName, int fieldSize, int stepSize) {
+	    		System.out.println("SimulationLoader-Konstruktor");
 	    		this.simulationName = simulationName;
 	    		this.fieldSize = fieldSize;
 	    		this.stepSize = stepSize;
@@ -141,7 +143,9 @@ public class Gui extends JFrame {
 			@Override
 			protected Void doInBackground() throws Exception {
 				
-				controller.loadSimulationData(simulationName, fieldSize, stepSize);				
+				System.out.println("SimulationLoader: Starte Daten im Controller zu laden");
+				controller.loadSimulationData(simulationName, fieldSize, stepSize);	
+				System.out.println("SimulationLoader: Fertig mit Daten laden im Controller");
 				
 				if (fieldSize < defaultFieldSize) {
 					heatMapPanel.setSize(defaultFieldSize, defaultFieldSize);
@@ -149,7 +153,9 @@ public class Gui extends JFrame {
 					heatMapPanel.setSize(fieldSize, fieldSize);
 				}
 				
+				System.out.println("SimulationPlayer wird initialisiert.");
 				simulationPlayer = new SimulationPlayer(stepSize);
+				System.out.println("SimulationPlayer wird gestartet.");
 				simulationPlayer.execute();
 				
 				return null;
@@ -166,6 +172,7 @@ public class Gui extends JFrame {
 			
 			@Override
 			protected Void doInBackground() throws Exception {
+				System.out.println("SimulationPlayer gestartet.");
 				SimulationStep step = controller.getNextStep();
 				while (step != null) {
 					heatMapPanel.updateData(step.getFields(), useGraphicsYAxis);

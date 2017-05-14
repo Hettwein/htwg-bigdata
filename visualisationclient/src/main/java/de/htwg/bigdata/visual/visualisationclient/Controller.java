@@ -33,7 +33,11 @@ public class Controller {
 	}
 	
 	public SimulationStep getNextStep() {
-		if (iterator.hasNext()) { return iterator.next(); }
+		if (iterator.hasNext()) { 
+//			SimulationStep step = iterator.next();
+//			System.out.println(step);
+//			return step;}
+			return iterator.next(); }
 		return null;
 	}
 	

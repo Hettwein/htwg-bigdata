@@ -13,10 +13,16 @@ public class SimulationStep implements Comparable<SimulationStep>{
 	
 	public void setField(int x, int y, int concentration) {
 		
-		if (x > fields.length - 1 ) { throw new RuntimeException("x to big"); }
-		if (y > fields[x].length - 1) { throw new RuntimeException("y to big"); }
+		if (x > fields.length - 1 ) { 
+			System.out.println("x to big");
+			throw new RuntimeException("x to big"); 
+			}
+		if (y > fields[x].length - 1) { 
+			System.out.println("y to big");
+			throw new RuntimeException("y to big"); 
+			}
 		if (concentration < 0) { throw new RuntimeException("concentration should not be negative"); }	  				  		
-		
+
 		try {
 			fields[x][y] = (double) concentration;
 		} catch (Exception e) {

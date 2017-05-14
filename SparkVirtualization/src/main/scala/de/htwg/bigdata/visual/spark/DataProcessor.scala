@@ -81,11 +81,11 @@ class DataProcessor extends java.io.Serializable {
       val transormedGrid = currentAnts.map(t =>
         {
           var doc = t._2
-          doc.append("newX", (Math.max((doc.getInteger("x") / ratio),gridRequest.x-1)).toInt)
-          doc.append("newY", (Math.max((doc.getInteger("y") / ratio),gridRequest.x-1)).toInt)
+          doc.append("newX", (Math.min((doc.getInteger("x") / ratio),gridRequest.x-1)).toInt)
+          doc.append("newY", (Math.min((doc.getInteger("y") / ratio),gridRequest.x-1)).toInt)
           doc.append("posID", (doc.get("newX").toString() + "_" + doc.get("newY").toString()))
         }).map(doc => (doc.get("posID").toString().hashCode(), doc))
-        .reduceByKey((doc: Document, doc2: Document) => doc)
+        //.reduceByKey((doc: Document, doc2: Document) => doc)
               println("STEP"+stepCount+" Calculated transformed Grid") 
 
       //(id,count)
