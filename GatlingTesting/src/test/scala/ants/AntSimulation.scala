@@ -121,19 +121,7 @@ class AntSimulation extends Simulation with DefaultJsonProtocol {
   private def getSessionVar(session: Session, varName: String) = session.get(varName).asOption[String].getOrElse("-1")
 
   private def calculateNewPosition(x: Int, y: Int): (Int, Int) = {
-    // increase x OR y randomly OR (increase x and y)
-    var randomInt = random.nextInt(3)
-
-    // x already on border
-    if (x >= finalPosition._1) {
-      randomInt = 2
-    }
-
-    // y already on border
-    if (y >= finalPosition._2) {
-      randomInt = 1
-    }
-
+    val randomInt = if (x >= finalPosition._1) 2 else if (y >= finalPosition._2) 1 else random.nextInt(3)
     randomInt match {
       case 0 => if (x < finalPosition._1 && y < finalPosition._2) return (x + 1, y + 1)
       case 1 => if (x < finalPosition._1) return (x + 1, y)
