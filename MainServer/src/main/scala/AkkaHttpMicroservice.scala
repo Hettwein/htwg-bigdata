@@ -87,7 +87,7 @@ trait Service extends DefaultJsonProtocol {
       }~pathPrefix("newsimulation") {
 
           get {
-            Database.generateNewCollectionName()
+//            Database.generateNewCollectionName()
             antService = new AntService()
             complete("ok")
           }
@@ -108,7 +108,7 @@ trait Service extends DefaultJsonProtocol {
                     val futureBlocker = blocker.future
                     val json = parse(content)
                     val ant = json.extract[Ant_DTO]
-                    println(ant.toString)
+//                    println(ant.toString)
                     /* Ameise will aus dem Feld laufen */
                     if(ant.x_new > columns || ant.y_new > rows){
                       statusCode = StatusCodes.Forbidden.intValue
@@ -125,7 +125,8 @@ trait Service extends DefaultJsonProtocol {
                         case StatusCodes.Created => {
                           /* Ameise bewegen auf Main Server */
                           antService.updateAnt(ant.id, ant.x_new, ant.y_new)
-                          Database.updateAnt(ant.id, ant.x_new, ant.y_new)}
+//                          Database.updateAnt(ant.id, ant.x_new, ant.y_new)
+                          }
                           statusCode = StatusCodes.OK.intValue
 
 

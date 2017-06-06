@@ -32,7 +32,7 @@ trait Service extends DefaultJsonProtocol {
               entity(as[String]) { content: String =>
                 val json = parse(content)
                 val ant = json.extract[Ant_DTO]
-                println(ant.toString)
+//                println(ant.toString)
                 var statusCode = 0
                 val position: Position = Position(ant.x_new, ant.y_new)
                 if (positionSet.add(position)) {
