@@ -18,17 +18,20 @@ import scala.concurrent.{ExecutionContextExecutor, _}
 import scala.concurrent.duration.Duration
 import scala.collection.mutable
 
+
+case class AppConfiguration(antNo: Int, destX: Int, destY: Int, startX: Int, startY: Int, serverIp: String)
+
 trait Service extends DefaultJsonProtocol {
   implicit def executor: ExecutionContextExecutor
+
   val logger: LoggingAdapter
   implicit val system: ActorSystem
   implicit val materializer: Materializer
   implicit val formats = DefaultFormats
   implicit val ant_dtoFormat = jsonFormat5(Ant_DTO)
   implicit val antFormat = jsonFormat3(Ant)
+  implicit val appConfigurationFormat = jsonFormat6(AppConfiguration)
 
-  //val db: Database = Database
-  var antService: AntService = new AntService()
   val routes = {
     logRequestResult("akka-http-microservice") {
 
@@ -51,32 +54,56 @@ trait Service extends DefaultJsonProtocol {
             complete(strBuilder.toString)
           }
         }
-      }~pathPrefix("replay") {
-            path(RestPath) { collectionname =>
-
-              var ants = DatabaseRead.readAnts(collectionname.toString())
-              for (ant <- ants) {
-                antService.updateAnt(ant.id, ant.x, ant.y)
-              }
-
-              val positions = antService.getAntsPosition()
-              val strBuilder = new StringBuilder
-              for (row <- 0 to rows) {
-                for (col <- 0 to columns) {
-                  if (positions.exists(p => p.x == col && p.y == row)) {
-                    strBuilder ++= " "
-                    strBuilder ++= "@"
-                  } else {
-                    strBuilder ++= "  "
-                  }
+      } ~ pathPrefix("config") {
+        pathEnd {
+          get {
+            /* return application configuration*/
+            val appConfiguration = new AppConfiguration(this.antNumber, this.destination_x, this.destination_y, this.start_x, this.start_y, this.server_ip)
+            complete(appConfiguration.toJson.toString())
+          } ~
+            put {
+              decodeRequest {
+                entity(as[String]) { content: String =>
+                  println(content)
+                  val json = parse(content)
+                  val appConfiguration = json.extract[AppConfiguration]
+                  this.antNumber = appConfiguration.antNo
+                  this.destination_x = appConfiguration.destX
+                  this.destination_y = appConfiguration.destY
+                  this.start_x = appConfiguration.startX
+                  this.start_y = appConfiguration.startY
+                  this.server_ip = appConfiguration.serverIp
+                  complete(StatusCodes.OK.intValue, "")
                 }
-                strBuilder ++= "\n"
               }
-              complete(strBuilder.toString)
+            }
+        }
+      } ~ pathPrefix("replay") {
+        path(RestPath) { collectionname =>
+
+          var ants = DatabaseRead.readAnts(collectionname.toString())
+          for (ant <- ants) {
+            antService.updateAnt(ant.id, ant.x, ant.y)
+          }
+
+          val positions = antService.getAntsPosition()
+          val strBuilder = new StringBuilder
+          for (row <- 0 to rows) {
+            for (col <- 0 to columns) {
+              if (positions.exists(p => p.x == col && p.y == row)) {
+                strBuilder ++= " "
+                strBuilder ++= "@"
+              } else {
+                strBuilder ++= "  "
+              }
+            }
+            strBuilder ++= "\n"
+          }
+          complete(strBuilder.toString)
 
 
         }
-      }~pathPrefix("startreplay") {
+      } ~ pathPrefix("startreplay") {
 
         get {
           DatabaseRead.currentMillis = 0;
@@ -84,15 +111,15 @@ trait Service extends DefaultJsonProtocol {
           complete("ok")
         }
 
-      }~pathPrefix("newsimulation") {
+      } ~ pathPrefix("newsimulation") {
 
-          get {
-//            Database.generateNewCollectionName()
-            antService = new AntService()
-            complete("ok")
-          }
+        get {
+          //            Database.generateNewCollectionName()
+          antService = new AntService()
+          complete("ok")
+        }
 
-      }~
+      } ~
         pathPrefix("ant") {
           path(Segment) { id =>
             get {
@@ -108,25 +135,25 @@ trait Service extends DefaultJsonProtocol {
                     val futureBlocker = blocker.future
                     val json = parse(content)
                     val ant = json.extract[Ant_DTO]
-//                    println(ant.toString)
+                    //                    println(ant.toString)
                     /* Ameise will aus dem Feld laufen */
-                    if(ant.x_new > columns || ant.y_new > rows){
+                    if (ant.x_new > columns || ant.y_new > rows) {
                       statusCode = StatusCodes.Forbidden.intValue
-                      complete(statusCode,"")
+                      complete(statusCode, "")
                     }
                     val responsibleServerNumberMove = ant.x_new % numberOfServer
                     val serverUriMove = ipAddressMap(responsibleServerNumberMove)
                     /* Kollisionsüberprüfung über HTTP auf Worker Server */
-                    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(PUT, uri = "http://" + serverUriMove + "/ant", entity = ant.toJson.toString()))
-                    for(response <- responseFuture) {
-                      response.status match{
+                    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(PUT, uri = "http://" + server_ip + "/ant", entity = ant.toJson.toString()))
+                    for (response <- responseFuture) {
+                      response.status match {
 
                         /* Ameise hat sich bewegt */
                         case StatusCodes.Created => {
                           /* Ameise bewegen auf Main Server */
                           antService.updateAnt(ant.id, ant.x_new, ant.y_new)
-//                          Database.updateAnt(ant.id, ant.x_new, ant.y_new)
-                          }
+                          //                          Database.updateAnt(ant.id, ant.x_new, ant.y_new)
+                        }
                           statusCode = StatusCodes.OK.intValue
 
 
@@ -139,15 +166,15 @@ trait Service extends DefaultJsonProtocol {
                       blocker.success()
                     }
                     /* Falls die Ameise auf dem Zielfeld ankommt gibt sie dieses wieder frei */
-                    if(ant.x_new == destination_x && ant.y_new == destination_y) {
-                      val ant_for_delete :Ant_DTO = Ant_DTO(ant.id,ant x_new, ant.y_new,ant.x_new,ant.y_new)
+                    if (ant.x_new == destination_x && ant.y_new == destination_y) {
+                      val ant_for_delete: Ant_DTO = Ant_DTO(ant.id, ant x_new, ant.y_new, ant.x_new, ant.y_new)
                       Await.result(responseFuture, Duration.Inf)
-                      Http().singleRequest(HttpRequest(DELETE, uri = "http://" + serverUriMove + "/ant", entity = ant_for_delete.toJson.toString()))
+                      Http().singleRequest(HttpRequest(DELETE, uri = "http://" + server_ip + "/ant", entity = ant_for_delete.toJson.toString()))
                     }
 
                     /* warten ob die Ameise gelaufen ist */
                     Await.result(futureBlocker, Duration.Inf)
-                    complete(statusCode,"")
+                    complete(statusCode, "")
                   }
                 }
               } ~
@@ -156,16 +183,16 @@ trait Service extends DefaultJsonProtocol {
                 antService.deleteAnt(id)
                 complete(ant.toJson.toString())
               }
-          }~
+          } ~
             pathEnd {
               /* Ameise anlegen */
               post {
                 val r = scala.util.Random
-                val x_current : Int = r.nextInt(2)
-                val y_current : Int = r.nextInt(2)
-                val ant = Ant(getCounter.toString ,x_current,y_current)
+                val x_current: Int = r.nextInt(start_x)
+                val y_current: Int = r.nextInt(start_y)
+                val ant = Ant(getCounter.toString, x_current, y_current)
                 antService.createAnt(ant)
-                val antDTO = Ant_DTO(ant.id,ant.x,ant.y, -1,-1)
+                val antDTO = Ant_DTO(ant.id, ant.x, ant.y, -1, -1)
                 complete(antDTO)
               }
             }
@@ -173,12 +200,18 @@ trait Service extends DefaultJsonProtocol {
     }
   }
   private val counter = new AtomicInteger()
+  //val db: Database = Database
+  var antService: AntService = new AntService()
   var numberOfServer: Int = 0
-  var ipAddressMap: mutable.HashMap[Int,String] = mutable.HashMap[Int, String]()
+  var ipAddressMap: mutable.HashMap[Int, String] = mutable.HashMap[Int, String]()
   var rows: Int = 0
   var columns: Int = 0
   var destination_x = 0
   var destination_y = 0
+  var antNumber = 0
+  var start_x = 0
+  var start_y = 0
+  var server_ip = ""
 
   def config: Config
 
@@ -195,13 +228,18 @@ object AkkaHttpMicroservice extends App with Service {
   columns = config.getInt("fieldWith.columns")
   destination_x = config.getInt("destination.x")
   destination_y = config.getInt("destination.y")
+  rows = destination_y
+  columns = destination_x
+  start_x = config.getInt("startArea.x")
+  start_y = config.getInt("startArea.y")
+  server_ip = config.getStringList("servers").head
 
   numberOfServer = config.getStringList("servers").size()
 
   for ((ipAddress, iterator) <- config.getStringList("servers").zipWithIndex) {
-    ipAddressMap.put(iterator,ipAddress)
+    ipAddressMap.put(iterator, ipAddress)
   }
 
-  println("MainServer on Port "+config.getInt("http.port"))
+  println("MainServer on Port " + config.getInt("http.port"))
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 }
