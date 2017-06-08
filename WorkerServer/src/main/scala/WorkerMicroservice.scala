@@ -14,6 +14,7 @@ import scala.concurrent.ExecutionContextExecutor
 
 case class Ant_DTO(id: String, x_current: Int, y_current: Int, x_new: Int, y_new: Int)
 case class Position(x: Int, y: Int)
+case class ServerIp(ip: String)
 
 trait Service extends DefaultJsonProtocol {
   implicit val system: ActorSystem
@@ -64,10 +65,25 @@ trait Service extends DefaultJsonProtocol {
               }
             }
         }
+      } ~ pathPrefix("config") {
+        pathEnd {
+          put {
+            decodeRequest {
+              entity(as[String]) { content: String =>
+                println(content)
+                val json = parse(content)
+                val appConfiguration = json.extract[ServerIp]
+                this.serverIp = appConfiguration.ip
+                complete(StatusCodes.OK.intValue, "")
+              }
+            }
+          }
+        }
       }
     }
   }
   var numberOfServer: Int = 0
+  var serverIp = ""
   var ipAddressMap: mutable.HashMap[Int, String] = mutable.HashMap[Int, String]()
   def config: Config
 }
@@ -80,11 +96,11 @@ object AkkaHttpMicroservice extends App with Service {
   override val logger = Logging(system, getClass)
 
   numberOfServer = config.getStringList("servers").size()
+  serverIp = config.getStringList("servers").head
 
   for ((ipAddress, id) <- config.getStringList("servers").zipWithIndex) {
     ipAddressMap.put(id, ipAddress)
   }
   println("Worker on Port " + config.getInt("http.port"))
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
-  
 }

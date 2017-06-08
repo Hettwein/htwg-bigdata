@@ -10,7 +10,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import net.liftweb.json._
 import spray.json.{DefaultJsonProtocol, _}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.HttpMethods.POST
+import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
@@ -28,11 +28,13 @@ class AntSimulation extends Simulation with DefaultJsonProtocol {
   val headers_10 = Map("Content-Type" -> """application/json""")
   private val random = scala.util.Random
   val finalPosition = (25, 25)
-  val ip = "127.0.0.1"
+  val ip = "192.168.99.115"
   private val counter = new AtomicInteger()
-  private val numberOfAnts = 10000
+  private val numberOfAnts = 120
 
   Http().singleRequest(HttpRequest(uri = "http://" + ip + ":27020/newsimulation", entity = ""))
+  Http().singleRequest(HttpRequest(PUT, uri = "http://" + ip + ":27020/config", entity = s"""{ "antNo":100,"destX":10,"destY":10,"startX":2,"startY":2,"serverIp":"${ip}:27021" }"""))
+  Http().singleRequest(HttpRequest(PUT, uri = "http://" + ip + ":27021/config", entity = """{"ip":"${ip}"}"""))
 
   val httpConf = http
     .baseURL("http://" + ip + ":27020") // Here is the root for all relative URLs
