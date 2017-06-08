@@ -1,0 +1,10 @@
+{
+  "simulation": "ants.AntSimulation",
+  "simulationId": "antsimulation",
+  "start": 1496923386321,
+  "description": "",
+  "scenarios": ["Display Ants Test", "Ants Test"],
+  "assertions": [
+
+  ]
+}
