@@ -144,7 +144,7 @@ trait Service extends DefaultJsonProtocol {
                     val responsibleServerNumberMove = ant.x_new % numberOfServer
                     val serverUriMove = ipAddressMap(responsibleServerNumberMove)
                     /* Kollisionsüberprüfung über HTTP auf Worker Server */
-                    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(PUT, uri = "http://" + server_ip + "/ant", entity = ant.toJson.toString()))
+                    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(PUT, uri = "http://" + serverUriMove + "/ant", entity = ant.toJson.toString()))
                     for (response <- responseFuture) {
                       response.status match {
 
@@ -169,7 +169,7 @@ trait Service extends DefaultJsonProtocol {
                     if (ant.x_new == destination_x && ant.y_new == destination_y) {
                       val ant_for_delete: Ant_DTO = Ant_DTO(ant.id, ant x_new, ant.y_new, ant.x_new, ant.y_new)
                       Await.result(responseFuture, Duration.Inf)
-                      Http().singleRequest(HttpRequest(DELETE, uri = "http://" + server_ip + "/ant", entity = ant_for_delete.toJson.toString()))
+                      Http().singleRequest(HttpRequest(DELETE, uri = "http://" + serverUriMove + "/ant", entity = ant_for_delete.toJson.toString()))
                     }
 
                     /* warten ob die Ameise gelaufen ist */

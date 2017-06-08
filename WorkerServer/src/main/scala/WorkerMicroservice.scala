@@ -40,7 +40,7 @@ trait Service extends DefaultJsonProtocol {
                   val responsibleServerNumberDelete = ant.x_current % numberOfServer
                   val serverUriDelete = ipAddressMap(responsibleServerNumberDelete)
                   statusCode = StatusCodes.Created.intValue
-                  Http().singleRequest(HttpRequest(DELETE, uri = "http://" + serverIp + "/ant", entity = compact(render(json))))
+                  Http().singleRequest(HttpRequest(DELETE, uri = "http://" + serverUriDelete + "/ant", entity = compact(render(json))))
                 } else {
                   statusCode = StatusCodes.Forbidden.intValue
                 }
