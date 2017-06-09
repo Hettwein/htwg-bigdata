@@ -5,6 +5,8 @@ Gatling AntSimulation
 Docker Swarm starten
 ---------------
 
+Im Docker Quickstart Terminal:
+
 ```bash
 $ sh createSwarmTest.sh
 ```
@@ -12,6 +14,8 @@ $ sh createSwarmTest.sh
 (IPs werden jetzt automatisch gesetzt)
 
 #### Worker zum Swarm hinzufügen:
+
+Auch im Docker Quickstart Terminal:
 
 ```bash
 $ sh createWorker.sh
