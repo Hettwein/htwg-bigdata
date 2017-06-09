@@ -71,6 +71,8 @@ trait Service extends DefaultJsonProtocol {
                   this.destination_y = appConfiguration.destY
                   this.start_x = appConfiguration.startX
                   this.start_y = appConfiguration.startY
+                  this.columns = appConfiguration.destX
+                  this.rows = appConfiguration.destY
                   this.server_ip = if (appConfiguration.serverIp != "") appConfiguration.serverIp else server_ip
                   complete(StatusCodes.OK.intValue, "")
                 }

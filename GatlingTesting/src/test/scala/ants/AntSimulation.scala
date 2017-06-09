@@ -32,11 +32,11 @@ class AntSimulation extends Simulation with DefaultJsonProtocol {
   val headers_10 = Map("Content-Type" -> """application/json""")
   private val random = scala.util.Random
   val finalPosition = (25, 25)
-  val ip = "192.168.99.101"
+  val ip = "192.168.99.104"
   val mainPort = ":27020"
   val workerPort = ":27021"
   private val counter = new AtomicInteger()
-  private val numberOfAnts = 120
+  private val numberOfAnts = 1000
 
   Http().singleRequest(HttpRequest(uri = "http://" + ip + ":27020/newsimulation", entity = ""))
   Http().singleRequest(HttpRequest(PUT, uri = "http://" + ip + mainPort + "/config", entity = AppConfiguration(numberOfAnts, finalPosition._1, finalPosition._1, 2, 2/*, ip + workerPort*/).toJson.toString))

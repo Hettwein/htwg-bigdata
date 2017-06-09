@@ -1,40 +1,39 @@
-Gatling's SBT plugin demo
+Gatling AntSimulation
 =========================
 
-A simple project showing how to configure and use Gatling's SBT plugin to run Gatling simulations. 
 
-This project uses SBT 0.13.15, which is available [here](http://www.scala-sbt.org/download.html) or through [Paul Phillips's sbt-extras script](https://github.com/paulp/sbt-extras).
-
-Get the project
+Docker Swarm starten
 ---------------
 
 ```bash
-git clone https://github.com/gatling/gatling-sbt-plugin-demo.git && cd gatling-sbt-plugin-demo
+$ sh createSwarmTest.sh
 ```
 
-Start SBT
----------
+(IPs werden jetzt automatisch gesetzt)
+
+#### Worker zum Swarm hinzufügen:
+
 ```bash
-$ sbt
+$ sh createWorker.sh
 ```
 
-Run all simulations
+(die IP des Host-Rechners und das Swarm-Token müssen vorher angepasst werden!)
+
+
+Simulation starten
 -------------------
 
-```bash
-> gatling:test
-```
-
-Run a single simulation
------------------------
+mit:
 
 ```bash
-> gatling:testOnly computerdatabase.BasicSimulation
+$ sbt gatling:test
 ```
 
-List all tasks
---------------------
+(startet alle Tests, es gibt aber sowieso nur einen)
+oder gezielt:
 
 ```bash
-> tasks gatling -v
+$ sbt gatling:testOnly ants.AntSimulation
 ```
+
+(die IP des Host-Rechners muss vorher angepasst werden!)
