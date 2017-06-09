@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SWARMTOKEN="SWMTKN-1-0vol01tpelgyhwstr8zuokruhu96269oi3a1puv6rufsz9tgzl-8um7ok57jaamv95wf4vxquc8i"
+SWARMTOKEN="SWMTKN-1-1oz3zynrm2oux3p9nftghhnn8ou8zw2qyr883r0e004vxyok8h-0tdyui3ej66rq2t6090gak6wb"
 MANAGERIP="141.37.160.129"
 MANAGERPORT="2377"
 
