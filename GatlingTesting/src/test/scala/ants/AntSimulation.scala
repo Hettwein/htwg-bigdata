@@ -18,26 +18,32 @@ import akka.stream.{ActorMaterializer, Materializer}
 import scala.concurrent.ExecutionContextExecutor
 
 case class Ant_DTO(id: String, x_current: Int, y_current: Int, x_new: Int, y_new: Int)
+case class AppConfiguration(antNo: Int, destX: Int, destY: Int, startX: Int, startY: Int, serverIp: String = "")
+case class ServerIp(ip: String)
 
 class AntSimulation extends Simulation with DefaultJsonProtocol {
 
   implicit val ant_dtoFormat = jsonFormat5(Ant_DTO)
+  implicit val appConfigFormat = jsonFormat6(AppConfiguration)
+  implicit val serverIpFormat = jsonFormat1(ServerIp)
   implicit val system = ActorSystem()
   implicit val executor = system.dispatcher
   implicit val materializer = ActorMaterializer()
   val headers_10 = Map("Content-Type" -> """application/json""")
   private val random = scala.util.Random
   val finalPosition = (25, 25)
-  val ip = "192.168.99.115"
+  val ip = "192.168.99.101"
+  val mainPort = ":27020"
+  val workerPort = ":27021"
   private val counter = new AtomicInteger()
   private val numberOfAnts = 120
 
   Http().singleRequest(HttpRequest(uri = "http://" + ip + ":27020/newsimulation", entity = ""))
-  Http().singleRequest(HttpRequest(PUT, uri = "http://" + ip + ":27020/config", entity = s"""{ "antNo":100,"destX":10,"destY":10,"startX":2,"startY":2,"serverIp":"${ip}:27021" }"""))
-  Http().singleRequest(HttpRequest(PUT, uri = "http://" + ip + ":27021/config", entity = """{"ip":"${ip}"}"""))
+  Http().singleRequest(HttpRequest(PUT, uri = "http://" + ip + mainPort + "/config", entity = AppConfiguration(numberOfAnts, finalPosition._1, finalPosition._1, 2, 2/*, ip + workerPort*/).toJson.toString))
+//  Http().singleRequest(HttpRequest(PUT, uri = "http://" + ip + workerPort + "/config", entity = ServerIp(ip + workerPort).toJson.toString))
 
   val httpConf = http
-    .baseURL("http://" + ip + ":27020") // Here is the root for all relative URLs
+    .baseURL("http://" + ip + mainPort) // Here is the root for all relative URLs
     .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8") // Here are the common headers
     .acceptEncodingHeader("gzip, deflate")
     .acceptLanguageHeader("en-US,en;q=0.5")

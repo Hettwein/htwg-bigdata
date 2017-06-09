@@ -66,14 +66,19 @@ docker-machine ssh manager1 docker swarm init --advertise-addr $MANAGERIP
 
 # Mainserver-Service erstellen
 docker-machine ssh manager1 docker service create -p 27020:27020 --name mainservice akka-http-microservice-mainserver:1.0
-#sleep 2
-#echo curl -H "Content-Type: application/json" -X PUT -d "{ """antNo""":100,"""destX""":10,"""destY""":10,"""startX""":2,"""startY""":2,"""serverIp""":"""$MANAGERIP:27021""" }" http://$MANAGERIP:27020/config
-#curl -H "Content-Type: application/json" -X PUT -d "{ """antNo""":100,"""destX""":10,"""destY""":10,"""startX""":2,"""startY""":2,"""serverIp""":"""$MANAGERIP:27021""" }" http://$MANAGERIP:27020/config
+
+echo "########################################################################"
+echo "Konfiguration"
+echo "########################################################################"
+sleep 10
+curl -H "Content-Type: application/json" -X PUT -d "{ \"antNo\":100,\"destX\":10,\"destY\"10,\"startX\":2,\"startY\":2,\"serverIp\":\"$MANAGERIP:27021\" }" http://$MANAGERIP:27020/config
 # Workerserver-Service erstellen
 docker-machine ssh manager1 docker service create -p 27021:27021 --name workerservice akka-http-microservice-workerserver:1.0
-#sleep 2
-#echo curl -H "Content-Type: application/json" -X PUT -d "{ """ip""":"""$MANAGERIP:27021""" }" http://$MANAGERIP:27021/config
-#curl -H "Content-Type: application/json" -X PUT -d "{ """ip""":"""$MANAGERIP:27021""" }" http://$MANAGERIP:27021/config
+sleep 10
+curl -H "Content-Type: application/json" -X PUT -d "{ \"ip\":\"$MANAGERIP:27021\" }" http://$MANAGERIP:27021/config
+
+curl -X GET http://$MANAGERIP:27020/config
+
 # Actorsystem-Service erstellen
 #sleep 2
 #docker-machine ssh manager1 docker service create --name actorservice actorsystem:1.0
